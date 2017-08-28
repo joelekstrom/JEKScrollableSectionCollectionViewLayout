@@ -49,7 +49,7 @@
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
     UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"cell" forIndexPath:indexPath];
-    cell.backgroundColor = indexPath.item % 2 == 0 ? [UIColor blueColor] : [UIColor redColor];
+    cell.backgroundColor = indexPath.item % 2 == 0 ? [UIColor darkGrayColor] : [UIColor lightGrayColor];
     return cell;
 }
 
