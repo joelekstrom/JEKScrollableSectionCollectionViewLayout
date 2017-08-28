@@ -24,6 +24,7 @@
     flowLayout.itemSize = CGSizeMake(50, 50);
     flowLayout.headerReferenceSize = CGSizeMake(100.0, 40.0);
     flowLayout.minimumLineSpacing = 0.0;
+    flowLayout.minimumInteritemSpacing = 0.0;
 
     self.collectionView = [[JEKScrollableSectionCollectionView alloc] initWithFrame:self.view.bounds collectionViewLayout:flowLayout];
     self.collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -69,12 +70,7 @@
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSLog(@"Selected item: %@", indexPath);
-}
-
-- (void)collectionView:(UICollectionView *)collectionView willDisplayCell:(nonnull UICollectionViewCell *)cell forItemAtIndexPath:(nonnull NSIndexPath *)indexPath
-{
-    NSLog(@"Will display cell at %@", indexPath);
+    NSLog(@"Did select item: %@", indexPath);
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didEndDisplayingCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath

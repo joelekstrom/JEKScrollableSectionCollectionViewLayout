@@ -11,7 +11,7 @@
 
 @protocol JEKScrollableCollectionViewDelegate <UICollectionViewDelegate>
 
-- (CGFloat)collectionView:(UICollectionView *)collectionView heightForSection:(NSInteger)section;
+- (CGFloat)collectionView:(UICollectionView *)collectionView heightForSectionAtIndex:(NSInteger)section;
 
 @end
 
