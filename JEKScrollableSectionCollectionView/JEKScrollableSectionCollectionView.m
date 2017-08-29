@@ -153,6 +153,47 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
     }];
 }
 
+- (NSArray<NSIndexPath *> *)indexPathsForSelectedItems
+{
+    // TODO: This function won't work for selected index paths that are outside the visible bounds
+    NSArray *selectedIndexPaths = @[];
+    for (JEKCollectionViewWrapperCell *cell in super.visibleCells) {
+        NSArray *indexPaths = cell.collectionView.indexPathsForSelectedItems;
+        for (NSIndexPath *indexPath in indexPaths) {
+            selectedIndexPaths = [selectedIndexPaths arrayByAddingObject:[NSIndexPath indexPathForItem:indexPath.item inSection:cell.collectionView.tag]];
+        }
+    }
+    return selectedIndexPaths;
+}
+
+- (NSArray<__kindof UICollectionViewCell *> *)visibleCells
+{
+    NSArray *visibleCells = @[];
+    for (JEKCollectionViewWrapperCell *cell in super.visibleCells) {
+        visibleCells = [visibleCells arrayByAddingObjectsFromArray:cell.collectionView.visibleCells];
+    }
+    return visibleCells;
+}
+
+- (NSArray<NSIndexPath *> *)indexPathsForVisibleItems
+{
+    NSArray *visibleIndexPaths = @[];
+    for (UICollectionViewCell *cell in self.visibleCells) {
+        visibleIndexPaths = [visibleIndexPaths arrayByAddingObject:[self indexPathForCell:cell]];
+    }
+    return visibleIndexPaths;
+}
+
+- (NSIndexPath *)indexPathForCell:(UICollectionViewCell *)cell
+{
+    if ([cell.superview.superview isKindOfClass:JEKCollectionViewWrapperCell.class]) {
+        JEKCollectionViewWrapperCell *wrapperCell = (JEKCollectionViewWrapperCell *)cell.superview.superview;
+        NSIndexPath *indexPath = [wrapperCell.collectionView indexPathForCell:cell];
+        return [NSIndexPath indexPathForItem:indexPath.item inSection:wrapperCell.collectionView.tag];
+    }
+    return nil;
+}
+
 @end
 
 #pragma mark -
