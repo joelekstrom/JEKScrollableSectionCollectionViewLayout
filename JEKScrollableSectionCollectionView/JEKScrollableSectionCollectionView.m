@@ -18,12 +18,13 @@
 
 @end
 
-@interface JEKScrollableCollectionViewController : NSObject <UICollectionViewDataSource, UICollectionViewDelegateFlowLayout>
+@interface JEKScrollableCollectionViewController : NSObject <UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UICollectionViewDataSourcePrefetching>
 
 @property (nonatomic, weak) JEKScrollableSectionCollectionView *collectionView;
 @property (nonatomic, strong) UICollectionViewFlowLayout *referenceLayout;
 @property (nonatomic, weak) id<UICollectionViewDataSource> externalDataSource;
 @property (nonatomic, weak) id<UICollectionViewDelegateFlowLayout> externalDelegate;
+@property (nonatomic, weak) id<UICollectionViewDataSourcePrefetching> externalPrefetchingDataSource;
 
 - (instancetype)initWithCollectionView:(JEKScrollableSectionCollectionView *)collectionView referenceLayout:(UICollectionViewFlowLayout *)referenceLayout;
 
@@ -71,6 +72,11 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 {
     [super setDataSource:dataSource ? self.controller : nil];
     self.controller.externalDataSource = dataSource;
+}
+
+- (void)setPrefetchDataSource:(id<UICollectionViewDataSourcePrefetching>)prefetchDataSource
+{
+    self.controller.externalPrefetchingDataSource = prefetchDataSource;
 }
 
 - (void)registerClass:(Class)cellClass forCellWithReuseIdentifier:(NSString *)identifier
@@ -202,6 +208,30 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
     return nil;
 }
 
+#pragma mark UICollectionViewDataSourcePrefetching
+
+- (void)collectionView:(UICollectionView *)collectionView prefetchItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
+{
+    if ([self.externalPrefetchingDataSource respondsToSelector:_cmd]) {
+        NSMutableArray *transformedIndexPaths = [NSMutableArray new];
+        for (NSIndexPath *indexPath in indexPaths) {
+            [transformedIndexPaths addObject:[NSIndexPath indexPathForItem:indexPath.section inSection:collectionView.tag]];
+        }
+        [self.externalPrefetchingDataSource collectionView:self.collectionView prefetchItemsAtIndexPaths:[transformedIndexPaths copy]];
+    }
+}
+
+- (void)collectionView:(UICollectionView *)collectionView cancelPrefetchingForItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
+{
+    if ([self.externalPrefetchingDataSource respondsToSelector:_cmd]) {
+        NSMutableArray *transformedIndexPaths = [NSMutableArray new];
+        for (NSIndexPath *indexPath in indexPaths) {
+            [transformedIndexPaths addObject:[NSIndexPath indexPathForItem:indexPath.section inSection:collectionView.tag]];
+        }
+        [self.externalPrefetchingDataSource collectionView:self.collectionView cancelPrefetchingForItemsAtIndexPaths:[transformedIndexPaths copy]];
+    }
+}
+
 #pragma mark UICollectionViewDelegate
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
@@ -277,6 +307,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
         JEKCollectionViewWrapperCell *wrapperCell = (JEKCollectionViewWrapperCell *)cell;
         wrapperCell.collectionView.dataSource = self;
         wrapperCell.collectionView.delegate = self;
+        wrapperCell.collectionView.prefetchDataSource = _externalPrefetchingDataSource ? self : nil;
         [wrapperCell.collectionView reloadData];
     } else if ([self.externalDelegate respondsToSelector:_cmd]) {
         [self.externalDelegate collectionView:self.collectionView willDisplayCell:cell forItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:collectionView.tag]];
@@ -289,6 +320,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
         JEKCollectionViewWrapperCell *wrapperCell = (JEKCollectionViewWrapperCell *)cell;
         wrapperCell.collectionView.dataSource = nil;
         wrapperCell.collectionView.delegate = nil;
+        wrapperCell.collectionView.prefetchDataSource = nil;
     } else if ([self.externalDelegate respondsToSelector:_cmd]) {
         [self.externalDelegate collectionView:self.collectionView didEndDisplayingCell:cell forItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:collectionView.tag]];
     }
