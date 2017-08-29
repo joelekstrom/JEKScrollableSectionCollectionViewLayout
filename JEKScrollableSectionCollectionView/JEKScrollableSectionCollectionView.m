@@ -51,6 +51,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
     layout.scrollDirection = UICollectionViewScrollDirectionVertical;
     layout.headerReferenceSize = referenceLayout.headerReferenceSize;
     layout.footerReferenceSize = referenceLayout.footerReferenceSize;
+    layout.sectionInset = referenceLayout.sectionInset;
     if (self = [super initWithFrame:frame collectionViewLayout:layout]) {
         self.controller = [[JEKScrollableCollectionViewController alloc] initWithCollectionView:self referenceLayout:referenceLayout];
         self.registeredCellClasses = [NSMutableDictionary new];
@@ -95,8 +96,55 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
         return [super dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
     }
 
-    JEKCollectionViewWrapperCell *cell = (JEKCollectionViewWrapperCell *)[self cellForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:indexPath.section]];
+    JEKCollectionViewWrapperCell *cell = (JEKCollectionViewWrapperCell *)[super cellForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:indexPath.section]];
     return [cell.collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:0]];
+}
+
+- (UICollectionViewCell *)cellForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    JEKCollectionViewWrapperCell *wrapperCell = (JEKCollectionViewWrapperCell *)[super cellForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:indexPath.section]];
+    return [wrapperCell.collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:0]];
+}
+
+- (void)insertItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
+{
+    [self performSelector:_cmd forItemsAtIndexPaths:indexPaths];
+}
+
+- (void)deleteItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
+{
+    [self performSelector:_cmd forItemsAtIndexPaths:indexPaths];
+}
+
+- (void)reloadItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
+{
+    [self performSelector:_cmd forItemsAtIndexPaths:indexPaths];
+}
+
+/**
+ When inserting/deleting/reloading items, we want to do it in the relevant child collection views.
+ This method finds the relevat collection views and transforms the index paths for them.
+ */
+- (void)performSelector:(SEL)selector forItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
+{
+    indexPaths = [indexPaths sortedArrayUsingDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"section" ascending:YES]]];
+
+    __block NSInteger currentSection = indexPaths.firstObject.section;
+    NSMutableArray<NSIndexPath *> *indexPathsForSection = [[NSMutableArray alloc] initWithObjects:[NSIndexPath indexPathForItem:indexPaths.firstObject.item inSection:0], nil];
+    [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger index, BOOL *stop) {
+        if (indexPath.section == currentSection) {
+            [indexPathsForSection addObject:[NSIndexPath indexPathForItem:indexPath.item inSection:0]];
+        } else {
+            JEKCollectionViewWrapperCell *cell = (JEKCollectionViewWrapperCell *)[super cellForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:currentSection]];
+            if ([cell.collectionView respondsToSelector:selector]) {
+                IMP imp = [cell.collectionView methodForSelector:selector];
+                void (*functionPtr)(id, SEL, NSArray<NSIndexPath *> *) = (void *)imp;
+                functionPtr(cell.collectionView, selector, indexPathsForSection);
+            }
+            [indexPathsForSection removeAllObjects];
+            ++currentSection;
+        }
+    }];
 }
 
 @end
@@ -280,6 +328,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
         [self.externalDelegate collectionView:self.collectionView didSelectItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:collectionView.tag]];
     }
 }
+
 
 @end
 
