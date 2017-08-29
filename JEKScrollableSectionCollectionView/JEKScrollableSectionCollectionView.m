@@ -28,6 +28,7 @@
 @property (nonatomic, weak) id<UICollectionViewDataSource> externalDataSource;
 @property (nonatomic, weak) id<UICollectionViewDelegateFlowLayout> externalDelegate;
 @property (nonatomic, weak) id<UICollectionViewDataSourcePrefetching> externalPrefetchingDataSource;
+@property (nonatomic, strong) NSMutableSet<NSIndexPath *> *selectedIndexPaths;
 
 - (instancetype)initWithCollectionView:(JEKScrollableSectionCollectionView *)collectionView referenceLayout:(UICollectionViewFlowLayout *)referenceLayout;
 
@@ -158,15 +159,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 
 - (NSArray<NSIndexPath *> *)indexPathsForSelectedItems
 {
-    // TODO: This function won't work for selected index paths that are outside the visible bounds
-    NSArray *selectedIndexPaths = @[];
-    for (JEKCollectionViewWrapperCell *cell in super.visibleCells) {
-        NSArray *indexPaths = cell.collectionView.indexPathsForSelectedItems;
-        for (NSIndexPath *indexPath in indexPaths) {
-            selectedIndexPaths = [selectedIndexPaths arrayByAddingObject:[NSIndexPath indexPathForItem:indexPath.item inSection:cell.collectionView.tag]];
-        }
-    }
-    return selectedIndexPaths;
+    return self.controller.selectedIndexPaths.allObjects;
 }
 
 - (NSArray<__kindof UICollectionViewCell *> *)visibleCells
@@ -211,6 +204,24 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
     }
 }
 
+- (void)selectItemAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UICollectionViewScrollPosition)scrollPosition
+{
+    [self.controller.selectedIndexPaths addObject:indexPath];
+    JEKCollectionViewWrapperCell *wrapperCell = (JEKCollectionViewWrapperCell *)[super cellForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:indexPath.section]];
+    [wrapperCell.collectionView selectItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:0] animated:animated scrollPosition:scrollPosition];
+
+    if (scrollPosition != UICollectionViewScrollPositionNone) {
+        [self scrollToItemAtIndexPath:indexPath atScrollPosition:scrollPosition animated:animated];
+    }
+}
+
+- (void)deselectItemAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated
+{
+    [self.controller.selectedIndexPaths removeObject:indexPath];
+    JEKCollectionViewWrapperCell *wrapperCell = (JEKCollectionViewWrapperCell *)[super cellForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:indexPath.section]];
+    [wrapperCell.collectionView deselectItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:0] animated:animated];
+}
+
 @end
 
 #pragma mark -
@@ -222,6 +233,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
     if (self = [super init]) {
         self.collectionView = collectionView;
         self.referenceLayout = referenceLayout;
+        self.selectedIndexPaths = [NSMutableSet new];
     }
     return self;
 }
@@ -366,7 +378,15 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
         wrapperCell.collectionView.dataSource = self;
         wrapperCell.collectionView.delegate = self;
         wrapperCell.collectionView.prefetchDataSource = _externalPrefetchingDataSource ? self : nil;
+        wrapperCell.collectionView.allowsMultipleSelection = collectionView.allowsMultipleSelection;
+        wrapperCell.collectionView.allowsSelection = collectionView.allowsSelection;
         [wrapperCell.collectionView reloadData];
+
+        for (NSIndexPath *indexPath in self.selectedIndexPaths) {
+            if (indexPath.section == wrapperCell.collectionView.tag) {
+                [wrapperCell.collectionView selectItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:0] animated:NO scrollPosition:UICollectionViewScrollPositionNone];
+            }
+        }
 
         if (self.collectionView.queuedIndexPath && self.collectionView.queuedIndexPath.section == wrapperCell.collectionView.tag) {
             [wrapperCell.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.collectionView.queuedIndexPath.item inSection:0]
@@ -421,11 +441,32 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
+    NSIndexPath *outerIndexPath = [NSIndexPath indexPathForItem:indexPath.item inSection:collectionView.tag];
+    NSIndexPath *previousSelection = [self.selectedIndexPaths anyObject];
+
+    // We must manually remove selection from other internal collection views
+    if (!self.collectionView.allowsMultipleSelection && previousSelection && previousSelection.section != outerIndexPath.section) {
+        [self.collectionView deselectItemAtIndexPath:previousSelection animated:NO];
+        if ([self.externalDelegate respondsToSelector:@selector(collectionView:didDeselectItemAtIndexPath:)]) {
+            [self.externalDelegate collectionView:self.collectionView didDeselectItemAtIndexPath:outerIndexPath];
+        }
+    }
+
+    [self.selectedIndexPaths addObject:outerIndexPath];
+
     if ([self.externalDelegate respondsToSelector:_cmd]) {
-        [self.externalDelegate collectionView:self.collectionView didSelectItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:collectionView.tag]];
+        [self.externalDelegate collectionView:self.collectionView didSelectItemAtIndexPath:outerIndexPath];
     }
 }
 
+- (void)collectionView:(UICollectionView *)collectionView didDeselectItemAtIndexPath:(nonnull NSIndexPath *)indexPath
+{
+    NSIndexPath *outerIndexPath = [NSIndexPath indexPathForItem:indexPath.item inSection:collectionView.tag];
+    [self.selectedIndexPaths removeObject:outerIndexPath];
+    if ([self.externalDelegate respondsToSelector:_cmd]) {
+        [self.externalDelegate collectionView:self.collectionView didDeselectItemAtIndexPath:outerIndexPath];
+    }
+}
 
 @end
 
