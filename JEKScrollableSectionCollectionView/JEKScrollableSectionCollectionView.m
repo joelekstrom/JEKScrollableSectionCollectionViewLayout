@@ -16,6 +16,9 @@
 @property (nonatomic, strong) NSMutableDictionary<NSString *, UINib *> *registeredCellNibs;
 @property (nonatomic, assign) NSUInteger registrationHash;
 
+@property (nonatomic, strong) NSIndexPath *queuedIndexPath;
+@property (nonatomic, assign) BOOL shouldAnimateScrollToQueuedIndexPath;
+
 @end
 
 @interface JEKScrollableCollectionViewController : NSObject <UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UICollectionViewDataSourcePrefetching>
@@ -194,6 +197,20 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
     return nil;
 }
 
+- (void)scrollToItemAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UICollectionViewScrollPosition)scrollPosition animated:(BOOL)animated
+{
+    NSIndexPath *outerIndexPath = [NSIndexPath indexPathForItem:0 inSection:indexPath.section];
+    NSIndexPath *innerIndexPath = [NSIndexPath indexPathForItem:indexPath.item inSection:0];
+    [super scrollToItemAtIndexPath:outerIndexPath atScrollPosition:UICollectionViewScrollPositionCenteredVertically animated:animated];
+    JEKCollectionViewWrapperCell *cell = (JEKCollectionViewWrapperCell *)[super cellForItemAtIndexPath:outerIndexPath];
+    if (cell) {
+        [cell.collectionView scrollToItemAtIndexPath:innerIndexPath atScrollPosition:scrollPosition animated:animated];
+    } else {
+        self.queuedIndexPath = indexPath;
+        self.shouldAnimateScrollToQueuedIndexPath = animated;
+    }
+}
+
 @end
 
 #pragma mark -
@@ -350,6 +367,13 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
         wrapperCell.collectionView.delegate = self;
         wrapperCell.collectionView.prefetchDataSource = _externalPrefetchingDataSource ? self : nil;
         [wrapperCell.collectionView reloadData];
+
+        if (self.collectionView.queuedIndexPath && self.collectionView.queuedIndexPath.section == wrapperCell.collectionView.tag) {
+            [wrapperCell.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.collectionView.queuedIndexPath.item inSection:0]
+                                               atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally
+                                                       animated:self.collectionView.shouldAnimateScrollToQueuedIndexPath];
+            self.collectionView.queuedIndexPath = nil;
+        }
     } else if ([self.externalDelegate respondsToSelector:_cmd]) {
         [self.externalDelegate collectionView:self.collectionView willDisplayCell:cell forItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:collectionView.tag]];
     }
