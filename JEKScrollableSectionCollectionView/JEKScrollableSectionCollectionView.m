@@ -29,6 +29,7 @@
 @property (nonatomic, weak) id<UICollectionViewDelegateFlowLayout> externalDelegate;
 @property (nonatomic, weak) id<UICollectionViewDataSourcePrefetching> externalPrefetchingDataSource;
 @property (nonatomic, strong) NSMutableSet<NSIndexPath *> *selectedIndexPaths;
+@property (nonatomic, strong) NSMutableDictionary<NSNumber *, NSValue *> *contentOffsetCache;
 
 - (instancetype)initWithCollectionView:(JEKScrollableSectionCollectionView *)collectionView referenceLayout:(UICollectionViewFlowLayout *)referenceLayout;
 
@@ -234,6 +235,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
         self.collectionView = collectionView;
         self.referenceLayout = referenceLayout;
         self.selectedIndexPaths = [NSMutableSet new];
+        self.contentOffsetCache = [NSMutableDictionary new];
     }
     return self;
 }
@@ -382,6 +384,9 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
         wrapperCell.collectionView.allowsSelection = collectionView.allowsSelection;
         [wrapperCell.collectionView reloadData];
 
+        NSValue *contentOffset = self.contentOffsetCache[@(indexPath.section)];
+        wrapperCell.collectionView.contentOffset = contentOffset ? contentOffset.CGPointValue : CGPointZero;
+
         for (NSIndexPath *indexPath in self.selectedIndexPaths) {
             if (indexPath.section == wrapperCell.collectionView.tag) {
                 [wrapperCell.collectionView selectItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:0] animated:NO scrollPosition:UICollectionViewScrollPositionNone];
@@ -403,6 +408,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 {
     if (collectionView == self.collectionView) {
         JEKCollectionViewWrapperCell *wrapperCell = (JEKCollectionViewWrapperCell *)cell;
+        self.contentOffsetCache[@(indexPath.section)] = [NSValue valueWithCGPoint:wrapperCell.collectionView.contentOffset];
         wrapperCell.collectionView.dataSource = nil;
         wrapperCell.collectionView.delegate = nil;
         wrapperCell.collectionView.prefetchDataSource = nil;
@@ -469,6 +475,8 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 }
 
 @end
+
+#pragma mark -
 
 @implementation JEKCollectionViewWrapperCell
 
