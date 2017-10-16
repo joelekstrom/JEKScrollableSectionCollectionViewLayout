@@ -349,7 +349,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
     }
 
     if ([self.externalDelegate respondsToSelector:_cmd]) {
-        return [self.externalDelegate collectionView:self.collectionView layout:collectionViewLayout minimumLineSpacingForSectionAtIndex:collectionView.tag];
+        return [self.externalDelegate collectionView:self.collectionView layout:self.collectionView.collectionViewLayout minimumLineSpacingForSectionAtIndex:collectionView.tag];
     }
 
     return [(UICollectionViewFlowLayout *)self.collectionView.collectionViewLayout minimumLineSpacing];
@@ -362,11 +362,24 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
     }
 
     if ([self.externalDelegate respondsToSelector:_cmd]) {
-        return [self.externalDelegate collectionView:self.collectionView layout:collectionViewLayout minimumInteritemSpacingForSectionAtIndex:collectionView.tag];
+        return [self.externalDelegate collectionView:self.collectionView layout:self.collectionView.collectionViewLayout minimumInteritemSpacingForSectionAtIndex:collectionView.tag];
     }
 
     return [(UICollectionViewFlowLayout *)self.collectionView.collectionViewLayout minimumInteritemSpacing];
 }
+
+
+- (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewFlowLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section
+{
+    if (collectionView == self.collectionView) {
+        return UIEdgeInsetsZero;
+    }
+
+    if ([self.externalDelegate respondsToSelector:_cmd]) {
+        return [self.externalDelegate collectionView:collectionView layout:self.collectionView.collectionViewLayout insetForSectionAtIndex:collectionView.tag];
+    }
+
+    return [(UICollectionViewFlowLayout *)self.collectionView.collectionViewLayout sectionInset];
 }
 
 - (void)collectionView:(UICollectionView *)collectionView willDisplayCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath
