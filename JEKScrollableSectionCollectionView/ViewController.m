@@ -68,7 +68,7 @@
 {
     UICollectionViewFlowLayout *flowLayout = (UICollectionViewFlowLayout *)collectionView.collectionViewLayout;
     if (section == 0) {
-        return flowLayout.itemSize.height * 3 + flowLayout.minimumInteritemSpacing * 2;
+        return flowLayout.itemSize.height * 3 + 10.0; // 10.0 is the line spacing, (5.0 * 2)
     } else if (section == 1) {
         return flowLayout.itemSize.height + _section1Insets.top + _section1Insets.bottom;
     } else {
@@ -78,10 +78,18 @@
 
 - (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewFlowLayout *)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section
 {
-    if (section == 2) {
-        return 10.0;
+    if (section == 0) {
+        return 5.0;
     }
     return collectionViewLayout.minimumLineSpacing;
+}
+
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewFlowLayout *)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section
+{
+    if (section == 2) {
+        return 5.0;
+    }
+    return collectionViewLayout.minimumInteritemSpacing;
 }
 
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
@@ -100,7 +108,7 @@
     } else if (indexPath.section == 1) {
         label.text = @"Section with insets";
     } else if (indexPath.section == 2) {
-        label.text = @"Section with line spacing";
+        label.text = @"Section with interItemSpacing";
     }
     return view;
 }

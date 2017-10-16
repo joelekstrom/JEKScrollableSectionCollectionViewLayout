@@ -348,11 +348,13 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
         return 0.0;
     }
 
-    if ([self.externalDelegate respondsToSelector:_cmd]) {
-        return [self.externalDelegate collectionView:self.collectionView layout:self.collectionView.collectionViewLayout minimumLineSpacingForSectionAtIndex:collectionView.tag];
+    // Call the inter-item spacing function of the delegate instead, since that's what you expect from a vertical collection view.
+    // The inner collection views are actually horizontal, but that's unknown outside this class
+    if ([self.externalDelegate respondsToSelector:@selector(collectionView:layout:minimumInteritemSpacingForSectionAtIndex:)]) {
+        return [self.externalDelegate collectionView:self.collectionView layout:self.collectionView.collectionViewLayout minimumInteritemSpacingForSectionAtIndex:collectionView.tag];
     }
 
-    return [(UICollectionViewFlowLayout *)self.collectionView.collectionViewLayout minimumLineSpacing];
+    return [(UICollectionViewFlowLayout *)self.collectionView.collectionViewLayout minimumInteritemSpacing];
 }
 
 - (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewFlowLayout *)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section
@@ -361,11 +363,12 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
         return 0.0;
     }
 
-    if ([self.externalDelegate respondsToSelector:_cmd]) {
-        return [self.externalDelegate collectionView:self.collectionView layout:self.collectionView.collectionViewLayout minimumInteritemSpacingForSectionAtIndex:collectionView.tag];
+    // Use minimumLineSpacing instead. See comment in minimumLineSpacing for more info
+    if ([self.externalDelegate respondsToSelector:@selector(collectionView:layout:minimumLineSpacingForSectionAtIndex:)]) {
+        return [self.externalDelegate collectionView:self.collectionView layout:self.collectionView.collectionViewLayout minimumLineSpacingForSectionAtIndex:collectionView.tag];
     }
 
-    return [(UICollectionViewFlowLayout *)self.collectionView.collectionViewLayout minimumInteritemSpacing];
+    return [(UICollectionViewFlowLayout *)self.collectionView.collectionViewLayout minimumLineSpacing];
 }
 
 
