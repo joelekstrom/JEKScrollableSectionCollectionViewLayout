@@ -9,12 +9,12 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-@protocol JEKScrollableCollectionViewDelegate <UICollectionViewDelegate>
-
-- (CGFloat)collectionView:(UICollectionView *)collectionView heightForSectionAtIndex:(NSInteger)section;
+@interface JEKScrollableSectionCollectionView : UICollectionView
 
 @end
 
-@interface JEKScrollableSectionCollectionView : UICollectionView
+@protocol JEKScrollableCollectionViewDelegate <UICollectionViewDelegate>
+
+- (CGFloat)collectionView:(JEKScrollableSectionCollectionView *)collectionView heightForSectionAtIndex:(NSInteger)section;
 
 @end

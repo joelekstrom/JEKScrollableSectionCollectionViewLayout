@@ -24,14 +24,13 @@
 @interface JEKScrollableCollectionViewController : NSObject <UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UICollectionViewDataSourcePrefetching>
 
 @property (nonatomic, weak) JEKScrollableSectionCollectionView *collectionView;
-@property (nonatomic, strong) UICollectionViewFlowLayout *referenceLayout;
 @property (nonatomic, weak) id<UICollectionViewDataSource> externalDataSource;
 @property (nonatomic, weak) id<UICollectionViewDelegateFlowLayout> externalDelegate;
 @property (nonatomic, weak) id<UICollectionViewDataSourcePrefetching> externalPrefetchingDataSource;
 @property (nonatomic, strong) NSMutableSet<NSIndexPath *> *selectedIndexPaths;
 @property (nonatomic, strong) NSMutableDictionary<NSNumber *, NSValue *> *contentOffsetCache;
 
-- (instancetype)initWithCollectionView:(JEKScrollableSectionCollectionView *)collectionView referenceLayout:(UICollectionViewFlowLayout *)referenceLayout;
+- (instancetype)initWithCollectionView:(JEKScrollableSectionCollectionView *)collectionView;
 
 @end
 
@@ -50,16 +49,12 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 
 @implementation JEKScrollableSectionCollectionView
 
-- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewFlowLayout *)referenceLayout
+- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewFlowLayout *)layout
 {
-    NSAssert([referenceLayout isKindOfClass:UICollectionViewFlowLayout.class], @"%@ must be initialized with a UICollectionViewFlowLayout", NSStringFromClass(self.class));
-    UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+    NSAssert([layout isKindOfClass:UICollectionViewFlowLayout.class], @"%@ must be initialized with a UICollectionViewFlowLayout", NSStringFromClass(self.class));
     layout.scrollDirection = UICollectionViewScrollDirectionVertical;
-    layout.headerReferenceSize = referenceLayout.headerReferenceSize;
-    layout.footerReferenceSize = referenceLayout.footerReferenceSize;
-    layout.sectionInset = referenceLayout.sectionInset;
     if (self = [super initWithFrame:frame collectionViewLayout:layout]) {
-        self.controller = [[JEKScrollableCollectionViewController alloc] initWithCollectionView:self referenceLayout:referenceLayout];
+        self.controller = [[JEKScrollableCollectionViewController alloc] initWithCollectionView:self];
         self.registeredCellClasses = [NSMutableDictionary new];
         self.registeredCellNibs = [NSMutableDictionary new];
         [super registerClass:JEKCollectionViewWrapperCell.class forCellWithReuseIdentifier:JEKCollectionViewWrapperCellIdentifier];
@@ -229,11 +224,10 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 
 @implementation JEKScrollableCollectionViewController
 
-- (instancetype)initWithCollectionView:(JEKScrollableSectionCollectionView *)collectionView referenceLayout:(UICollectionViewFlowLayout *)referenceLayout
+- (instancetype)initWithCollectionView:(JEKScrollableSectionCollectionView *)collectionView
 {
     if (self = [super init]) {
         self.collectionView = collectionView;
-        self.referenceLayout = referenceLayout;
         self.selectedIndexPaths = [NSMutableSet new];
         self.contentOffsetCache = [NSMutableDictionary new];
     }
@@ -309,9 +303,8 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
     if (collectionView == self.collectionView) {
-        CGSize size;
-        size.width = CGRectGetWidth(collectionView.frame);
-        size.height = self.referenceLayout.itemSize.height + self.referenceLayout.minimumLineSpacing;
+        UICollectionViewFlowLayout *flowLayout = (UICollectionViewFlowLayout *)collectionViewLayout;
+        CGSize size = CGSizeMake(CGRectGetWidth(collectionView.frame), flowLayout.itemSize.height);
         if ([self.externalDelegate respondsToSelector:@selector(collectionView:heightForSectionAtIndex:)]) {
             size.height = [(id)self.externalDelegate collectionView:self.collectionView heightForSectionAtIndex:indexPath.section];
         }
@@ -319,58 +312,61 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
     }
 
     if ([self.externalDelegate respondsToSelector:_cmd]) {
-        return [self.externalDelegate collectionView:self.collectionView layout:self.referenceLayout sizeForItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:collectionView.tag]];
+        return [self.externalDelegate collectionView:self.collectionView
+                                              layout:self.collectionView.collectionViewLayout
+                              sizeForItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:collectionView.tag]];
     }
 
-    return self.referenceLayout.itemSize;
+    return [(UICollectionViewFlowLayout *)self.collectionView.collectionViewLayout itemSize];
 }
 
-- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewFlowLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section
 {
     if (collectionView == self.collectionView) {
         if ([self.externalDelegate respondsToSelector:_cmd]) {
-            return [self.externalDelegate collectionView:self.collectionView layout:self.referenceLayout referenceSizeForHeaderInSection:section];
+            return [self.externalDelegate collectionView:self.collectionView layout:collectionViewLayout referenceSizeForHeaderInSection:section];
         }
-        return self.referenceLayout.headerReferenceSize;
+        return collectionViewLayout.headerReferenceSize;
     }
     return CGSizeZero;
 }
 
-- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForFooterInSection:(NSInteger)section
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewFlowLayout *)collectionViewLayout referenceSizeForFooterInSection:(NSInteger)section
 {
     if (collectionView == self.collectionView) {
         if ([self.externalDelegate respondsToSelector:_cmd]) {
-            return [self.externalDelegate collectionView:self.collectionView layout:self.referenceLayout referenceSizeForFooterInSection:section];
+            return [self.externalDelegate collectionView:self.collectionView layout:collectionViewLayout referenceSizeForFooterInSection:section];
         }
-        return self.referenceLayout.footerReferenceSize;
+        return collectionViewLayout.footerReferenceSize;
     }
     return CGSizeZero;
 }
 
-- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewFlowLayout *)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section
 {
     if (collectionView == self.collectionView) {
         return 0.0;
     }
 
     if ([self.externalDelegate respondsToSelector:_cmd]) {
-        return [self.externalDelegate collectionView:self.collectionView layout:self.referenceLayout minimumLineSpacingForSectionAtIndex:collectionView.tag];
+        return [self.externalDelegate collectionView:self.collectionView layout:collectionViewLayout minimumLineSpacingForSectionAtIndex:collectionView.tag];
     }
 
-    return self.referenceLayout.minimumLineSpacing;
+    return [(UICollectionViewFlowLayout *)self.collectionView.collectionViewLayout minimumLineSpacing];
 }
 
-- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewFlowLayout *)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section
 {
     if (collectionView == self.collectionView) {
         return 0.0;
     }
 
     if ([self.externalDelegate respondsToSelector:_cmd]) {
-        return [self.externalDelegate collectionView:self.collectionView layout:self.referenceLayout minimumInteritemSpacingForSectionAtIndex:collectionView.tag];
+        return [self.externalDelegate collectionView:self.collectionView layout:collectionViewLayout minimumInteritemSpacingForSectionAtIndex:collectionView.tag];
     }
 
-    return self.referenceLayout.minimumInteritemSpacing;
+    return [(UICollectionViewFlowLayout *)self.collectionView.collectionViewLayout minimumInteritemSpacing];
+}
 }
 
 - (void)collectionView:(UICollectionView *)collectionView willDisplayCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath
