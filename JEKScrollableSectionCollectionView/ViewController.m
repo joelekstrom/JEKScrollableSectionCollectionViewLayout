@@ -12,6 +12,7 @@
 @interface ViewController () <UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout>
 
 @property (nonatomic, strong) UICollectionView *collectionView;
+@property (nonatomic, assign) UIEdgeInsets section1Insets;
 
 @end
 
@@ -21,7 +22,7 @@
 {
     [super viewDidLoad];
     UICollectionViewFlowLayout *flowLayout = [UICollectionViewFlowLayout new];
-    flowLayout.itemSize = CGSizeMake(50, 50);
+    flowLayout.itemSize = CGSizeMake(80, 80);
     flowLayout.headerReferenceSize = CGSizeMake(100.0, 40.0);
     flowLayout.minimumLineSpacing = 0.0;
     flowLayout.minimumInteritemSpacing = 0.0;
@@ -34,11 +35,13 @@
     [self.collectionView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"cell"];
     [self.collectionView registerClass:[UICollectionReusableView class] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"header"];
     [self.view addSubview:self.collectionView];
+
+    self.section1Insets = UIEdgeInsetsMake(5.0, 100.0, 5.0, 20.0);
 }
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
 {
-    return 10;
+    return 3;
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
@@ -53,6 +56,34 @@
     return cell;
 }
 
+- (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section
+{
+    if (section == 1) {
+        return self.section1Insets;
+    }
+    return UIEdgeInsetsZero;
+}
+
+- (CGFloat)collectionView:(JEKScrollableSectionCollectionView *)collectionView heightForSectionAtIndex:(NSInteger)section
+{
+    UICollectionViewFlowLayout *flowLayout = (UICollectionViewFlowLayout *)collectionView.collectionViewLayout;
+    if (section == 0) {
+        return flowLayout.itemSize.height * 3 + flowLayout.minimumInteritemSpacing * 2;
+    } else if (section == 1) {
+        return flowLayout.itemSize.height + _section1Insets.top + _section1Insets.bottom;
+    } else {
+        return flowLayout.itemSize.height;
+    }
+}
+
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewFlowLayout *)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section
+{
+    if (section == 2) {
+        return 10.0;
+    }
+    return collectionViewLayout.minimumLineSpacing;
+}
+
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
     UICollectionReusableView *view = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:@"header" forIndexPath:indexPath];
@@ -64,7 +95,13 @@
         [view addSubview:label];
     }
 
-    label.text = [NSString stringWithFormat:@"Section %li", (long)indexPath.section];
+    if (indexPath.section == 0) {
+        label.text = @"Section with multiple rows";
+    } else if (indexPath.section == 1) {
+        label.text = @"Section with insets";
+    } else if (indexPath.section == 2) {
+        label.text = @"Section with line spacing";
+    }
     return view;
 }
 
