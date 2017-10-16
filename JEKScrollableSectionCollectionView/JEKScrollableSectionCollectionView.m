@@ -382,6 +382,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
         wrapperCell.collectionView.prefetchDataSource = _externalPrefetchingDataSource ? self : nil;
         wrapperCell.collectionView.allowsMultipleSelection = collectionView.allowsMultipleSelection;
         wrapperCell.collectionView.allowsSelection = collectionView.allowsSelection;
+        wrapperCell.collectionView.showsHorizontalScrollIndicator = self.collectionView.showsHorizontalScrollIndicator;
         [wrapperCell.collectionView reloadData];
 
         NSValue *contentOffset = self.contentOffsetCache[@(indexPath.section)];
@@ -487,6 +488,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
         layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
         self.collectionView = [[UICollectionView alloc] initWithFrame:self.contentView.bounds collectionViewLayout:layout];
         self.collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        self.collectionView.backgroundColor = [UIColor clearColor];
         [self.contentView addSubview:self.collectionView];
     }
     return self;
