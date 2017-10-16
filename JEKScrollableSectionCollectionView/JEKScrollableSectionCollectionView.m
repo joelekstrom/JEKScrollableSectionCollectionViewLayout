@@ -133,24 +133,37 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
  */
 - (void)performSelector:(SEL)selector forItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
 {
-    indexPaths = [indexPaths sortedArrayUsingDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"section" ascending:YES]]];
-
-    __block NSInteger currentSection = indexPaths.firstObject.section;
-    NSMutableArray<NSIndexPath *> *indexPathsForSection = [[NSMutableArray alloc] initWithObjects:[NSIndexPath indexPathForItem:indexPaths.firstObject.item inSection:0], nil];
-    [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger index, BOOL *stop) {
-        if (indexPath.section == currentSection) {
-            [indexPathsForSection addObject:[NSIndexPath indexPathForItem:indexPath.item inSection:0]];
-        } else {
-            JEKCollectionViewWrapperCell *cell = (JEKCollectionViewWrapperCell *)[super cellForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:currentSection]];
-            if ([cell.collectionView respondsToSelector:selector]) {
-                IMP imp = [cell.collectionView methodForSelector:selector];
-                void (*functionPtr)(id, SEL, NSArray<NSIndexPath *> *) = (void *)imp;
-                functionPtr(cell.collectionView, selector, indexPathsForSection);
-            }
-            [indexPathsForSection removeAllObjects];
-            ++currentSection;
+    [[self indexPathsGroupedBySection:indexPaths] enumerateKeysAndObjectsUsingBlock:^(NSNumber *section, NSArray<NSIndexPath *> *indexPaths, BOOL *stop) {
+        JEKCollectionViewWrapperCell *cell = (JEKCollectionViewWrapperCell *)[super cellForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:section.integerValue]];
+        if ([cell.collectionView respondsToSelector:selector]) {
+            IMP imp = [cell.collectionView methodForSelector:selector];
+            void (*functionPtr)(id, SEL, NSArray<NSIndexPath *> *) = (void *)imp;
+            functionPtr(cell.collectionView, selector, indexPaths);
         }
     }];
+}
+
+/**
+ Transforms an array of indexPaths into a dictionary grouped by section where each key is the
+ section index. The actual section is removed from the indexPath objects and replaced by 0.
+ */
+- (NSDictionary<NSNumber *, NSArray<NSIndexPath *> *> *)indexPathsGroupedBySection:(NSArray<NSIndexPath *> *)indexPaths
+{
+    NSMutableDictionary *groupedIndexPaths = [NSMutableDictionary new];
+    indexPaths = [indexPaths sortedArrayUsingDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"section" ascending:YES]]];
+
+    NSMutableArray<NSIndexPath *> *currentSectionArray = nil;
+    NSInteger currentSectionIndex = -1;
+    for (NSIndexPath *indexPath in indexPaths) {
+        if (indexPath.section != currentSectionIndex) {
+            currentSectionIndex = indexPath.section;
+            currentSectionArray = [NSMutableArray new];
+            groupedIndexPaths[@(currentSectionIndex)] = currentSectionArray;
+        }
+        [currentSectionArray addObject:[NSIndexPath indexPathForItem:indexPath.item inSection:0]];
+    }
+
+    return [groupedIndexPaths copy];
 }
 
 - (NSArray<NSIndexPath *> *)indexPathsForSelectedItems
