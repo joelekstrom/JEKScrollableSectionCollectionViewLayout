@@ -9,6 +9,8 @@
 #import "JEKScrollableSectionCollectionView.h"
 
 @class JEKScrollableCollectionViewController;
+@class JEKCollectionViewWrapperCell;
+
 @interface JEKScrollableSectionCollectionView()
 
 @property (nonatomic, strong) JEKScrollableCollectionViewController *controller;
@@ -29,6 +31,7 @@
 @property (nonatomic, weak) id<UICollectionViewDataSourcePrefetching> externalPrefetchingDataSource;
 @property (nonatomic, strong) NSMutableSet<NSIndexPath *> *selectedIndexPaths;
 @property (nonatomic, strong) NSMutableDictionary<NSNumber *, NSValue *> *contentOffsetCache;
+@property (nonatomic, strong) NSMutableDictionary<NSNumber *, JEKCollectionViewWrapperCell *> *visibleCells;
 
 - (instancetype)initWithCollectionView:(JEKScrollableSectionCollectionView *)collectionView;
 
@@ -102,13 +105,13 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
         return [super dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
     }
 
-    JEKCollectionViewWrapperCell *cell = (JEKCollectionViewWrapperCell *)[super cellForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:indexPath.section]];
+    JEKCollectionViewWrapperCell *cell = self.controller.visibleCells[@(indexPath.section)];
     return [cell.collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:0]];
 }
 
 - (UICollectionViewCell *)cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    JEKCollectionViewWrapperCell *wrapperCell = (JEKCollectionViewWrapperCell *)[super cellForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:indexPath.section]];
+    JEKCollectionViewWrapperCell *wrapperCell = self.controller.visibleCells[@(indexPath.section)];
     return [wrapperCell.collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:0]];
 }
 
@@ -120,7 +123,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 - (NSArray<__kindof UICollectionViewCell *> *)visibleCells
 {
     NSArray *visibleCells = @[];
-    for (JEKCollectionViewWrapperCell *cell in super.visibleCells) {
+    for (JEKCollectionViewWrapperCell *cell in self.controller.visibleCells) {
         visibleCells = [visibleCells arrayByAddingObjectsFromArray:cell.collectionView.visibleCells];
     }
     return visibleCells;
@@ -129,7 +132,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 - (NSArray<NSIndexPath *> *)indexPathsForVisibleItems
 {
     NSArray *visibleIndexPaths = @[];
-    for (UICollectionViewCell *cell in self.visibleCells) {
+    for (UICollectionViewCell *cell in self.controller.visibleCells) {
         visibleIndexPaths = [visibleIndexPaths arrayByAddingObject:[self indexPathForCell:cell]];
     }
     return visibleIndexPaths;
@@ -150,7 +153,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
     NSIndexPath *outerIndexPath = [NSIndexPath indexPathForItem:0 inSection:indexPath.section];
     NSIndexPath *innerIndexPath = [NSIndexPath indexPathForItem:indexPath.item inSection:0];
     [super scrollToItemAtIndexPath:outerIndexPath atScrollPosition:UICollectionViewScrollPositionCenteredVertically animated:animated];
-    JEKCollectionViewWrapperCell *cell = (JEKCollectionViewWrapperCell *)[super cellForItemAtIndexPath:outerIndexPath];
+    JEKCollectionViewWrapperCell *cell = self.controller.visibleCells[@(indexPath.section)];
     if (cell) {
         [cell.collectionView scrollToItemAtIndexPath:innerIndexPath atScrollPosition:scrollPosition animated:animated];
     } else {
@@ -162,7 +165,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 - (void)selectItemAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UICollectionViewScrollPosition)scrollPosition
 {
     [self.controller.selectedIndexPaths addObject:indexPath];
-    JEKCollectionViewWrapperCell *wrapperCell = (JEKCollectionViewWrapperCell *)[super cellForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:indexPath.section]];
+    JEKCollectionViewWrapperCell *wrapperCell = self.controller.visibleCells[@(indexPath.section)];
     [wrapperCell.collectionView selectItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:0] animated:animated scrollPosition:scrollPosition];
 
     if (scrollPosition != UICollectionViewScrollPositionNone) {
@@ -173,7 +176,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 - (void)deselectItemAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated
 {
     [self.controller.selectedIndexPaths removeObject:indexPath];
-    JEKCollectionViewWrapperCell *wrapperCell = (JEKCollectionViewWrapperCell *)[super cellForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:indexPath.section]];
+    JEKCollectionViewWrapperCell *wrapperCell = self.controller.visibleCells[@(indexPath.section)];
     [wrapperCell.collectionView deselectItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:0] animated:animated];
 }
 
@@ -196,13 +199,13 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 
 - (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
 {
-    JEKCollectionViewWrapperCell *cell = (JEKCollectionViewWrapperCell *)[super cellForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:indexPath.section]];
+    JEKCollectionViewWrapperCell *cell = self.controller.visibleCells[@(indexPath.section)];
     if (indexPath.section == newIndexPath.section) {
         // When moving within a single section, we can just forward the move to the child collection view
         [cell.collectionView moveItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:0] toIndexPath:[NSIndexPath indexPathForItem:newIndexPath.item inSection:0]];
     } else {
         // Otherwise, we use delete/insert instead in the respective cells
-        JEKCollectionViewWrapperCell *cell2 = (JEKCollectionViewWrapperCell *)[super cellForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:newIndexPath.section]];
+        JEKCollectionViewWrapperCell *cell2 = self.controller.visibleCells[@(indexPath.section)];
         [cell.collectionView deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:indexPath.item inSection:0]]];
         [cell2.collectionView insertItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:newIndexPath.item inSection:0]]];
     }
@@ -227,7 +230,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 - (void)performBatchUpdates:(void (^)(void))updates completion:(void (^)(BOOL))completion
 {
     [super performBatchUpdates:^{
-        [self performBatchUpdatesInLastCell:super.visibleCells updates:updates];
+        [self performBatchUpdatesInLastCell:self.controller.visibleCells.allValues updates:updates];
     } completion:completion];
 }
 
@@ -238,7 +241,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 - (void)performSelector:(SEL)selector forItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
 {
     [[self indexPathsGroupedBySection:indexPaths] enumerateKeysAndObjectsUsingBlock:^(NSNumber *section, NSArray<NSIndexPath *> *indexPaths, BOOL *stop) {
-        JEKCollectionViewWrapperCell *cell = (JEKCollectionViewWrapperCell *)[super cellForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:section.integerValue]];
+        JEKCollectionViewWrapperCell *cell = self.controller.visibleCells[section];
         if ([cell.collectionView respondsToSelector:selector]) {
             IMP imp = [cell.collectionView methodForSelector:selector];
             void (*functionPtr)(id, SEL, NSArray<NSIndexPath *> *) = (void *)imp;
@@ -282,6 +285,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
         self.collectionView = collectionView;
         self.selectedIndexPaths = [NSMutableSet new];
         self.contentOffsetCache = [NSMutableDictionary new];
+        self.visibleCells = [NSMutableDictionary new];
     }
     return self;
 }
@@ -447,6 +451,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
         wrapperCell.collectionView.allowsMultipleSelection = collectionView.allowsMultipleSelection;
         wrapperCell.collectionView.allowsSelection = collectionView.allowsSelection;
         wrapperCell.collectionView.showsHorizontalScrollIndicator = self.collectionView.showsHorizontalScrollIndicator;
+        self.visibleCells[@(indexPath.section)] = wrapperCell;
         [wrapperCell.collectionView reloadData];
 
         NSValue *contentOffset = self.contentOffsetCache[@(indexPath.section)];
@@ -473,10 +478,14 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 {
     if (collectionView == self.collectionView) {
         JEKCollectionViewWrapperCell *wrapperCell = (JEKCollectionViewWrapperCell *)cell;
-        self.contentOffsetCache[@(indexPath.section)] = [NSValue valueWithCGPoint:wrapperCell.collectionView.contentOffset];
+        NSNumber *section = @(indexPath.section);
+        self.contentOffsetCache[section] = [NSValue valueWithCGPoint:wrapperCell.collectionView.contentOffset];
         wrapperCell.collectionView.dataSource = nil;
         wrapperCell.collectionView.delegate = nil;
         wrapperCell.collectionView.prefetchDataSource = nil;
+        if (self.visibleCells[section] == wrapperCell) {
+            self.visibleCells[section] = nil;
+        }
     } else if ([self.externalDelegate respondsToSelector:_cmd]) {
         [self.externalDelegate collectionView:self.collectionView didEndDisplayingCell:cell forItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:collectionView.tag]];
     }
