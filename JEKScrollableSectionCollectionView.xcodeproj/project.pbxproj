@@ -7,15 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5D0344B51F543D8E0050DE76 /* JEKScrollableSectionCollectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D0344B41F543D8E0050DE76 /* JEKScrollableSectionCollectionView.m */; };
-		5D0344B61F543D8E0050DE76 /* JEKScrollableSectionCollectionView.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 5D0344B31F543D8E0050DE76 /* JEKScrollableSectionCollectionView.h */; };
 		5D0344BE1F543DC00050DE76 /* libJEKScrollableSectionCollectionView.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5D0344B11F543D8E0050DE76 /* libJEKScrollableSectionCollectionView.a */; };
-		5D8FEDD31F463D0300857A7E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D8FEDD21F463D0300857A7E /* main.m */; };
-		5D8FEDD61F463D0300857A7E /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D8FEDD51F463D0300857A7E /* AppDelegate.m */; };
-		5D8FEDD91F463D0300857A7E /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D8FEDD81F463D0300857A7E /* ViewController.m */; };
-		5D8FEDDC1F463D0300857A7E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5D8FEDDA1F463D0300857A7E /* Main.storyboard */; };
-		5D8FEDDE1F463D0300857A7E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5D8FEDDD1F463D0300857A7E /* Assets.xcassets */; };
-		5D8FEDE11F463D0300857A7E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5D8FEDDF1F463D0300857A7E /* LaunchScreen.storyboard */; };
+		5D3B435C1F95F50E006B8B8E /* JEKScrollableSectionCollectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D3B435A1F95F50E006B8B8E /* JEKScrollableSectionCollectionView.m */; };
+		5D3B436A1F95F559006B8B8E /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D3B435F1F95F558006B8B8E /* AppDelegate.m */; };
+		5D3B436F1F95F559006B8B8E /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D3B43681F95F559006B8B8E /* ViewController.m */; };
+		5D3B43781F95F614006B8B8E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5D3B43711F95F614006B8B8E /* Assets.xcassets */; };
+		5D3B437B1F95F614006B8B8E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D3B43761F95F614006B8B8E /* main.m */; };
+		5D3B437F1F95F690006B8B8E /* JEKScrollableSectionCollectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D3B435A1F95F50E006B8B8E /* JEKScrollableSectionCollectionView.m */; };
+		5D3B43801F95F6B7006B8B8E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5D3B43721F95F614006B8B8E /* LaunchScreen.storyboard */; };
+		5D3B43811F95F6B7006B8B8E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5D3B43741F95F614006B8B8E /* Main.storyboard */; };
+		5D76E78B1F975409003E9DA6 /* JEKScrollableSectionCollectionView.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 5D3B435B1F95F50E006B8B8E /* JEKScrollableSectionCollectionView.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,7 +36,7 @@
 			dstPath = "include/$(PRODUCT_NAME)";
 			dstSubfolderSpec = 16;
 			files = (
-				5D0344B61F543D8E0050DE76 /* JEKScrollableSectionCollectionView.h in CopyFiles */,
+				5D76E78B1F975409003E9DA6 /* JEKScrollableSectionCollectionView.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -43,18 +44,18 @@
 
 /* Begin PBXFileReference section */
 		5D0344B11F543D8E0050DE76 /* libJEKScrollableSectionCollectionView.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libJEKScrollableSectionCollectionView.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		5D0344B31F543D8E0050DE76 /* JEKScrollableSectionCollectionView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JEKScrollableSectionCollectionView.h; sourceTree = "<group>"; };
-		5D0344B41F543D8E0050DE76 /* JEKScrollableSectionCollectionView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JEKScrollableSectionCollectionView.m; sourceTree = "<group>"; };
+		5D3B435A1F95F50E006B8B8E /* JEKScrollableSectionCollectionView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JEKScrollableSectionCollectionView.m; sourceTree = "<group>"; };
+		5D3B435B1F95F50E006B8B8E /* JEKScrollableSectionCollectionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JEKScrollableSectionCollectionView.h; sourceTree = "<group>"; };
+		5D3B435E1F95F558006B8B8E /* ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ViewController.h; path = "Example Project/ViewController.h"; sourceTree = "<group>"; };
+		5D3B435F1F95F558006B8B8E /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = "Example Project/AppDelegate.m"; sourceTree = "<group>"; };
+		5D3B43621F95F558006B8B8E /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = "Example Project/AppDelegate.h"; sourceTree = "<group>"; };
+		5D3B43681F95F559006B8B8E /* ViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ViewController.m; path = "Example Project/ViewController.m"; sourceTree = "<group>"; };
+		5D3B43711F95F614006B8B8E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		5D3B43731F95F614006B8B8E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		5D3B43751F95F614006B8B8E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		5D3B43761F95F614006B8B8E /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		5D3B43771F95F614006B8B8E /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5D8FEDCE1F463D0300857A7E /* Example Project.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Example Project.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		5D8FEDD21F463D0300857A7E /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		5D8FEDD41F463D0300857A7E /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = JEKScrollableSectionCollectionView/AppDelegate.h; sourceTree = "<group>"; };
-		5D8FEDD51F463D0300857A7E /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = JEKScrollableSectionCollectionView/AppDelegate.m; sourceTree = "<group>"; };
-		5D8FEDD71F463D0300857A7E /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ViewController.h; path = JEKScrollableSectionCollectionView/ViewController.h; sourceTree = "<group>"; };
-		5D8FEDD81F463D0300857A7E /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = ViewController.m; path = JEKScrollableSectionCollectionView/ViewController.m; sourceTree = "<group>"; };
-		5D8FEDDB1F463D0300857A7E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		5D8FEDDD1F463D0300857A7E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = JEKScrollableSectionCollectionView/Assets.xcassets; sourceTree = "<group>"; };
-		5D8FEDE01F463D0300857A7E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		5D8FEDE21F463D0300857A7E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = JEKScrollableSectionCollectionView/Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,33 +80,34 @@
 		5D0344AC1F543D2B0050DE76 /* Example Project */ = {
 			isa = PBXGroup;
 			children = (
-				5D8FEDD41F463D0300857A7E /* AppDelegate.h */,
-				5D8FEDD51F463D0300857A7E /* AppDelegate.m */,
-				5D8FEDD71F463D0300857A7E /* ViewController.h */,
-				5D8FEDD81F463D0300857A7E /* ViewController.m */,
-				5D8FEDDA1F463D0300857A7E /* Main.storyboard */,
-				5D8FEDDD1F463D0300857A7E /* Assets.xcassets */,
-				5D8FEDDF1F463D0300857A7E /* LaunchScreen.storyboard */,
-				5D8FEDE21F463D0300857A7E /* Info.plist */,
-				5D8FEDD11F463D0300857A7E /* Supporting Files */,
+				5D3B43621F95F558006B8B8E /* AppDelegate.h */,
+				5D3B435F1F95F558006B8B8E /* AppDelegate.m */,
+				5D3B435E1F95F558006B8B8E /* ViewController.h */,
+				5D3B43681F95F559006B8B8E /* ViewController.m */,
+				5D3B43701F95F614006B8B8E /* Supporting Files */,
 			);
 			name = "Example Project";
 			sourceTree = "<group>";
 		};
-		5D0344B21F543D8E0050DE76 /* JEKScrollableSectionCollectionView */ = {
+		5D3B43701F95F614006B8B8E /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				5D0344B31F543D8E0050DE76 /* JEKScrollableSectionCollectionView.h */,
-				5D0344B41F543D8E0050DE76 /* JEKScrollableSectionCollectionView.m */,
+				5D3B43711F95F614006B8B8E /* Assets.xcassets */,
+				5D3B43721F95F614006B8B8E /* LaunchScreen.storyboard */,
+				5D3B43741F95F614006B8B8E /* Main.storyboard */,
+				5D3B43761F95F614006B8B8E /* main.m */,
+				5D3B43771F95F614006B8B8E /* Info.plist */,
 			);
-			path = JEKScrollableSectionCollectionView;
+			name = "Supporting Files";
+			path = "Example Project/Supporting Files";
 			sourceTree = "<group>";
 		};
 		5D8FEDC51F463D0300857A7E = {
 			isa = PBXGroup;
 			children = (
+				5D3B435B1F95F50E006B8B8E /* JEKScrollableSectionCollectionView.h */,
+				5D3B435A1F95F50E006B8B8E /* JEKScrollableSectionCollectionView.m */,
 				5D0344AC1F543D2B0050DE76 /* Example Project */,
-				5D0344B21F543D8E0050DE76 /* JEKScrollableSectionCollectionView */,
 				5D8FEDCF1F463D0300857A7E /* Products */,
 			);
 			sourceTree = "<group>";
@@ -117,15 +119,6 @@
 				5D0344B11F543D8E0050DE76 /* libJEKScrollableSectionCollectionView.a */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		5D8FEDD11F463D0300857A7E /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				5D8FEDD21F463D0300857A7E /* main.m */,
-			);
-			name = "Supporting Files";
-			path = JEKScrollableSectionCollectionView;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -172,7 +165,7 @@
 		5D8FEDC61F463D0300857A7E /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0830;
+				LastUpgradeCheck = 0900;
 				ORGANIZATIONNAME = "Joel Ekström";
 				TargetAttributes = {
 					5D0344B01F543D8E0050DE76 = {
@@ -211,9 +204,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5D8FEDE11F463D0300857A7E /* LaunchScreen.storyboard in Resources */,
-				5D8FEDDE1F463D0300857A7E /* Assets.xcassets in Resources */,
-				5D8FEDDC1F463D0300857A7E /* Main.storyboard in Resources */,
+				5D3B43801F95F6B7006B8B8E /* LaunchScreen.storyboard in Resources */,
+				5D3B43811F95F6B7006B8B8E /* Main.storyboard in Resources */,
+				5D3B43781F95F614006B8B8E /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -224,7 +217,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5D0344B51F543D8E0050DE76 /* JEKScrollableSectionCollectionView.m in Sources */,
+				5D3B437F1F95F690006B8B8E /* JEKScrollableSectionCollectionView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -232,9 +225,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5D8FEDD91F463D0300857A7E /* ViewController.m in Sources */,
-				5D8FEDD61F463D0300857A7E /* AppDelegate.m in Sources */,
-				5D8FEDD31F463D0300857A7E /* main.m in Sources */,
+				5D3B436F1F95F559006B8B8E /* ViewController.m in Sources */,
+				5D3B435C1F95F50E006B8B8E /* JEKScrollableSectionCollectionView.m in Sources */,
+				5D3B437B1F95F614006B8B8E /* main.m in Sources */,
+				5D3B436A1F95F559006B8B8E /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -249,22 +243,20 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		5D8FEDDA1F463D0300857A7E /* Main.storyboard */ = {
+		5D3B43721F95F614006B8B8E /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
-				5D8FEDDB1F463D0300857A7E /* Base */,
-			);
-			name = Main.storyboard;
-			path = JEKScrollableSectionCollectionView;
-			sourceTree = "<group>";
-		};
-		5D8FEDDF1F463D0300857A7E /* LaunchScreen.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				5D8FEDE01F463D0300857A7E /* Base */,
+				5D3B43731F95F614006B8B8E /* Base */,
 			);
 			name = LaunchScreen.storyboard;
-			path = JEKScrollableSectionCollectionView;
+			sourceTree = "<group>";
+		};
+		5D3B43741F95F614006B8B8E /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				5D3B43751F95F614006B8B8E /* Base */,
+			);
+			name = Main.storyboard;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -300,7 +292,9 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
@@ -308,7 +302,11 @@
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -349,7 +347,9 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
@@ -357,7 +357,11 @@
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -387,7 +391,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = 5RNJHF933P;
-				INFOPLIST_FILE = JEKScrollableSectionCollectionView/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/Example Project/Supporting Files/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ekstrom.JEKScrollableSectionCollectionView.ExampleProject;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -399,7 +403,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = 5RNJHF933P;
-				INFOPLIST_FILE = JEKScrollableSectionCollectionView/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/Example Project/Supporting Files/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ekstrom.JEKScrollableSectionCollectionView.ExampleProject;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -416,6 +420,7 @@
 				5D0344B91F543D8E0050DE76 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		5D8FEDC91F463D0300857A7E /* Build configuration list for PBXProject "JEKScrollableSectionCollectionView" */ = {
 			isa = XCConfigurationList;
