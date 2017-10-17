@@ -552,6 +552,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
         layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
         self.collectionView = [[UICollectionView alloc] initWithFrame:self.contentView.bounds collectionViewLayout:layout];
         self.collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        self.collectionView.alwaysBounceHorizontal = YES;
         self.collectionView.backgroundColor = [UIColor clearColor];
         [self.contentView addSubview:self.collectionView];
     }
