@@ -112,83 +112,6 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
     return [wrapperCell.collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:0]];
 }
 
-- (void)insertItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
-{
-    [self performSelector:_cmd forItemsAtIndexPaths:indexPaths];
-}
-
-- (void)deleteItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
-{
-    [self performSelector:_cmd forItemsAtIndexPaths:indexPaths];
-}
-
-- (void)reloadItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
-{
-    [self performSelector:_cmd forItemsAtIndexPaths:indexPaths];
-}
-
-/**
- When performing batch updates, we need all child collection views to be in batch update mode.
- This function recursively begins performing batch updates on an array of cells, and runs the
- update block in the last one
- */
-- (void)performBatchUpdatesInLastCell:(NSArray<JEKCollectionViewWrapperCell *> *)cells updates:(void (^)(void))updates
-{
-    if (cells.count > 0) {
-        [cells.firstObject.collectionView performBatchUpdates:^{
-            [self performBatchUpdatesInLastCell:[cells subarrayWithRange:NSMakeRange(1, cells.count - 1)] updates:updates];
-        } completion:nil];
-    } else {
-        updates();
-    }
-}
-
-- (void)performBatchUpdates:(void (^)(void))updates completion:(void (^)(BOOL))completion
-{
-    [super performBatchUpdates:^{
-        [self performBatchUpdatesInLastCell:super.visibleCells updates:updates];
-    } completion:completion];
-}
-
-/**
- When inserting/deleting/reloading items, we want to do it in the relevant child collection views.
- This method finds the relevat collection views and transforms the index paths for them.
- */
-- (void)performSelector:(SEL)selector forItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
-{
-    [[self indexPathsGroupedBySection:indexPaths] enumerateKeysAndObjectsUsingBlock:^(NSNumber *section, NSArray<NSIndexPath *> *indexPaths, BOOL *stop) {
-        JEKCollectionViewWrapperCell *cell = (JEKCollectionViewWrapperCell *)[super cellForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:section.integerValue]];
-        if ([cell.collectionView respondsToSelector:selector]) {
-            IMP imp = [cell.collectionView methodForSelector:selector];
-            void (*functionPtr)(id, SEL, NSArray<NSIndexPath *> *) = (void *)imp;
-            functionPtr(cell.collectionView, selector, indexPaths);
-        }
-    }];
-}
-
-/**
- Transforms an array of indexPaths into a dictionary grouped by section where each key is the
- section index. The actual section is removed from the indexPath objects and replaced by 0.
- */
-- (NSDictionary<NSNumber *, NSArray<NSIndexPath *> *> *)indexPathsGroupedBySection:(NSArray<NSIndexPath *> *)indexPaths
-{
-    NSMutableDictionary *groupedIndexPaths = [NSMutableDictionary new];
-    indexPaths = [indexPaths sortedArrayUsingDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"section" ascending:YES]]];
-
-    NSMutableArray<NSIndexPath *> *currentSectionArray = nil;
-    NSInteger currentSectionIndex = -1;
-    for (NSIndexPath *indexPath in indexPaths) {
-        if (indexPath.section != currentSectionIndex) {
-            currentSectionIndex = indexPath.section;
-            currentSectionArray = [NSMutableArray new];
-            groupedIndexPaths[@(currentSectionIndex)] = currentSectionArray;
-        }
-        [currentSectionArray addObject:[NSIndexPath indexPathForItem:indexPath.item inSection:0]];
-    }
-
-    return [groupedIndexPaths copy];
-}
-
 - (NSArray<NSIndexPath *> *)indexPathsForSelectedItems
 {
     return self.controller.selectedIndexPaths.allObjects;
@@ -252,6 +175,99 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
     [self.controller.selectedIndexPaths removeObject:indexPath];
     JEKCollectionViewWrapperCell *wrapperCell = (JEKCollectionViewWrapperCell *)[super cellForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:indexPath.section]];
     [wrapperCell.collectionView deselectItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:0] animated:animated];
+}
+
+#pragma mark Updating content
+
+- (void)insertItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
+{
+    [self performSelector:_cmd forItemsAtIndexPaths:indexPaths];
+}
+
+- (void)deleteItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
+{
+    [self performSelector:_cmd forItemsAtIndexPaths:indexPaths];
+}
+
+- (void)reloadItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
+{
+    [self performSelector:_cmd forItemsAtIndexPaths:indexPaths];
+}
+
+- (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
+{
+    JEKCollectionViewWrapperCell *cell = (JEKCollectionViewWrapperCell *)[super cellForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:indexPath.section]];
+    if (indexPath.section == newIndexPath.section) {
+        // When moving within a single section, we can just forward the move to the child collection view
+        [cell.collectionView moveItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:0] toIndexPath:[NSIndexPath indexPathForItem:newIndexPath.item inSection:0]];
+    } else {
+        // Otherwise, we use delete/insert instead in the respective cells
+        JEKCollectionViewWrapperCell *cell2 = (JEKCollectionViewWrapperCell *)[super cellForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:newIndexPath.section]];
+        [cell.collectionView deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:indexPath.item inSection:0]]];
+        [cell2.collectionView insertItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:newIndexPath.item inSection:0]]];
+    }
+}
+
+/**
+ When performing batch updates, we need all child collection views to be in batch update mode.
+ This function recursively begins performing batch updates on an array of cells, and runs the
+ update block in the last one
+ */
+- (void)performBatchUpdatesInLastCell:(NSArray<JEKCollectionViewWrapperCell *> *)cells updates:(void (^)(void))updates
+{
+    if (cells.count > 0) {
+        [cells.firstObject.collectionView performBatchUpdates:^{
+            [self performBatchUpdatesInLastCell:[cells subarrayWithRange:NSMakeRange(1, cells.count - 1)] updates:updates];
+        } completion:nil];
+    } else {
+        updates();
+    }
+}
+
+- (void)performBatchUpdates:(void (^)(void))updates completion:(void (^)(BOOL))completion
+{
+    [super performBatchUpdates:^{
+        [self performBatchUpdatesInLastCell:super.visibleCells updates:updates];
+    } completion:completion];
+}
+
+/**
+ When inserting/deleting/reloading items, we want to do it in the relevant child collection views.
+ This method finds the relevat collection views and transforms the index paths for them.
+ */
+- (void)performSelector:(SEL)selector forItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
+{
+    [[self indexPathsGroupedBySection:indexPaths] enumerateKeysAndObjectsUsingBlock:^(NSNumber *section, NSArray<NSIndexPath *> *indexPaths, BOOL *stop) {
+        JEKCollectionViewWrapperCell *cell = (JEKCollectionViewWrapperCell *)[super cellForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:section.integerValue]];
+        if ([cell.collectionView respondsToSelector:selector]) {
+            IMP imp = [cell.collectionView methodForSelector:selector];
+            void (*functionPtr)(id, SEL, NSArray<NSIndexPath *> *) = (void *)imp;
+            functionPtr(cell.collectionView, selector, indexPaths);
+        }
+    }];
+}
+
+/**
+ Transforms an array of indexPaths into a dictionary grouped by section where each key is the
+ section index. The actual section is removed from the indexPath objects and replaced by 0.
+ */
+- (NSDictionary<NSNumber *, NSArray<NSIndexPath *> *> *)indexPathsGroupedBySection:(NSArray<NSIndexPath *> *)indexPaths
+{
+    NSMutableDictionary *groupedIndexPaths = [NSMutableDictionary new];
+    indexPaths = [indexPaths sortedArrayUsingDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"section" ascending:YES]]];
+
+    NSMutableArray<NSIndexPath *> *currentSectionArray = nil;
+    NSInteger currentSectionIndex = -1;
+    for (NSIndexPath *indexPath in indexPaths) {
+        if (indexPath.section != currentSectionIndex) {
+            currentSectionIndex = indexPath.section;
+            currentSectionArray = [NSMutableArray new];
+            groupedIndexPaths[@(currentSectionIndex)] = currentSectionArray;
+        }
+        [currentSectionArray addObject:[NSIndexPath indexPathForItem:indexPath.item inSection:0]];
+    }
+
+    return [groupedIndexPaths copy];
 }
 
 @end
