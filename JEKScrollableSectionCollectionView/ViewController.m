@@ -41,7 +41,7 @@
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
 {
-    return 3;
+    return 20;
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
@@ -109,6 +109,8 @@
         label.text = @"Section with insets";
     } else if (indexPath.section == 2) {
         label.text = @"Section with interItemSpacing";
+    } else {
+        label.text = [NSString stringWithFormat:@"Section %ld", indexPath.section];
     }
     return view;
 }
