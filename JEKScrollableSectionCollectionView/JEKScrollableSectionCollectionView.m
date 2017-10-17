@@ -128,6 +128,29 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 }
 
 /**
+ When performing batch updates, we need all child collection views to be in batch update mode.
+ This function recursively begins performing batch updates on an array of cells, and runs the
+ update block in the last one
+ */
+- (void)performBatchUpdatesInLastCell:(NSArray<JEKCollectionViewWrapperCell *> *)cells updates:(void (^)(void))updates
+{
+    if (cells.count > 0) {
+        [cells.firstObject.collectionView performBatchUpdates:^{
+            [self performBatchUpdatesInLastCell:[cells subarrayWithRange:NSMakeRange(1, cells.count - 1)] updates:updates];
+        } completion:nil];
+    } else {
+        updates();
+    }
+}
+
+- (void)performBatchUpdates:(void (^)(void))updates completion:(void (^)(BOOL))completion
+{
+    [super performBatchUpdates:^{
+        [self performBatchUpdatesInLastCell:super.visibleCells updates:updates];
+    } completion:completion];
+}
+
+/**
  When inserting/deleting/reloading items, we want to do it in the relevant child collection views.
  This method finds the relevat collection views and transforms the index paths for them.
  */
