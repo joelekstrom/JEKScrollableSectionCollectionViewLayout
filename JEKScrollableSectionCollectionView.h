@@ -24,6 +24,6 @@
 
  @return The desired height for the current section
  */
-- (CGFloat)collectionView:(JEKScrollableSectionCollectionView *)collectionView heightForSectionAtIndex:(NSInteger)section;
+- (CGFloat)collectionView:(nonnull JEKScrollableSectionCollectionView *)collectionView heightForSectionAtIndex:(NSInteger)section;
 
 @end
