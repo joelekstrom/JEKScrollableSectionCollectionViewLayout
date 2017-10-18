@@ -483,6 +483,11 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
         wrapperCell.collectionView.dataSource = nil;
         wrapperCell.collectionView.delegate = nil;
         wrapperCell.collectionView.prefetchDataSource = nil;
+
+        for (NSIndexPath *indexPath in wrapperCell.collectionView.indexPathsForSelectedItems) {
+            [wrapperCell.collectionView deselectItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:0] animated:NO];
+        }
+
         if (self.visibleCells[section] == wrapperCell) {
             self.visibleCells[section] = nil;
         }
@@ -521,30 +526,26 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSIndexPath *outerIndexPath = [NSIndexPath indexPathForItem:indexPath.item inSection:collectionView.tag];
+    NSIndexPath *externalIndexPath = [NSIndexPath indexPathForItem:indexPath.item inSection:collectionView.tag];
     NSIndexPath *previousSelection = [self.selectedIndexPaths anyObject];
 
-    // We must manually remove selection from other internal collection views
-    if (!self.collectionView.allowsMultipleSelection && previousSelection && previousSelection.section != outerIndexPath.section) {
+    if (!self.collectionView.allowsMultipleSelection && previousSelection && ![previousSelection isEqual:externalIndexPath]) {
         [self.collectionView deselectItemAtIndexPath:previousSelection animated:NO];
-        if ([self.externalDelegate respondsToSelector:@selector(collectionView:didDeselectItemAtIndexPath:)]) {
-            [self.externalDelegate collectionView:self.collectionView didDeselectItemAtIndexPath:outerIndexPath];
-        }
     }
 
-    [self.selectedIndexPaths addObject:outerIndexPath];
+    [self.selectedIndexPaths addObject:externalIndexPath];
 
     if ([self.externalDelegate respondsToSelector:_cmd]) {
-        [self.externalDelegate collectionView:self.collectionView didSelectItemAtIndexPath:outerIndexPath];
+        [self.externalDelegate collectionView:self.collectionView didSelectItemAtIndexPath:externalIndexPath];
     }
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didDeselectItemAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
-    NSIndexPath *outerIndexPath = [NSIndexPath indexPathForItem:indexPath.item inSection:collectionView.tag];
-    [self.selectedIndexPaths removeObject:outerIndexPath];
+    NSIndexPath *externalIndexPath = [NSIndexPath indexPathForItem:indexPath.item inSection:collectionView.tag];
+    [self.selectedIndexPaths removeObject:externalIndexPath];
     if ([self.externalDelegate respondsToSelector:_cmd]) {
-        [self.externalDelegate collectionView:self.collectionView didDeselectItemAtIndexPath:outerIndexPath];
+        [self.externalDelegate collectionView:self.collectionView didDeselectItemAtIndexPath:externalIndexPath];
     }
 }
 
