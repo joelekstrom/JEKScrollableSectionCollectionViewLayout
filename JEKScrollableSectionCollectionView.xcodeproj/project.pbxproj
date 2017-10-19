@@ -17,6 +17,7 @@
 		5D3B43801F95F6B7006B8B8E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5D3B43721F95F614006B8B8E /* LaunchScreen.storyboard */; };
 		5D3B43811F95F6B7006B8B8E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5D3B43741F95F614006B8B8E /* Main.storyboard */; };
 		5D76E78B1F975409003E9DA6 /* JEKScrollableSectionCollectionView.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 5D3B435B1F95F50E006B8B8E /* JEKScrollableSectionCollectionView.h */; };
+		5D99484C1F988FCC008DF84C /* ExampleCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D99484B1F988FCC008DF84C /* ExampleCell.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +57,8 @@
 		5D3B43761F95F614006B8B8E /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		5D3B43771F95F614006B8B8E /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5D8FEDCE1F463D0300857A7E /* Example Project.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Example Project.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5D99484A1F988FCC008DF84C /* ExampleCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ExampleCell.h; path = "Example Project/ExampleCell.h"; sourceTree = "<group>"; };
+		5D99484B1F988FCC008DF84C /* ExampleCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = ExampleCell.m; path = "Example Project/ExampleCell.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -84,6 +87,9 @@
 				5D3B435F1F95F558006B8B8E /* AppDelegate.m */,
 				5D3B435E1F95F558006B8B8E /* ViewController.h */,
 				5D3B43681F95F559006B8B8E /* ViewController.m */,
+				5D99484A1F988FCC008DF84C /* ExampleCell.h */,
+				5D99484B1F988FCC008DF84C /* ExampleCell.m */,
+				5D3B43741F95F614006B8B8E /* Main.storyboard */,
 				5D3B43701F95F614006B8B8E /* Supporting Files */,
 			);
 			name = "Example Project";
@@ -94,7 +100,6 @@
 			children = (
 				5D3B43711F95F614006B8B8E /* Assets.xcassets */,
 				5D3B43721F95F614006B8B8E /* LaunchScreen.storyboard */,
-				5D3B43741F95F614006B8B8E /* Main.storyboard */,
 				5D3B43761F95F614006B8B8E /* main.m */,
 				5D3B43771F95F614006B8B8E /* Info.plist */,
 			);
@@ -227,6 +232,7 @@
 			files = (
 				5D3B436F1F95F559006B8B8E /* ViewController.m in Sources */,
 				5D3B435C1F95F50E006B8B8E /* JEKScrollableSectionCollectionView.m in Sources */,
+				5D99484C1F988FCC008DF84C /* ExampleCell.m in Sources */,
 				5D3B437B1F95F614006B8B8E /* main.m in Sources */,
 				5D3B436A1F95F559006B8B8E /* AppDelegate.m in Sources */,
 			);

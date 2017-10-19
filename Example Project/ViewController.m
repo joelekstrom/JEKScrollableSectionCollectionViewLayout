@@ -8,10 +8,10 @@
 
 #import "ViewController.h"
 #import "JEKScrollableSectionCollectionView.h"
+#import "ExampleCell.h"
 
-@interface ViewController () <UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout>
+@interface ViewController () <UICollectionViewDelegateFlowLayout>
 
-@property (nonatomic, strong) UICollectionView *collectionView;
 @property (nonatomic, assign) UIEdgeInsets section1Insets;
 
 @end
@@ -21,21 +21,6 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    UICollectionViewFlowLayout *flowLayout = [UICollectionViewFlowLayout new];
-    flowLayout.itemSize = CGSizeMake(80, 80);
-    flowLayout.headerReferenceSize = CGSizeMake(100.0, 40.0);
-    flowLayout.minimumLineSpacing = 0.0;
-    flowLayout.minimumInteritemSpacing = 0.0;
-
-    self.collectionView = [[JEKScrollableSectionCollectionView alloc] initWithFrame:self.view.bounds collectionViewLayout:flowLayout];
-    self.collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    self.collectionView.dataSource = self;
-    self.collectionView.delegate = self;
-    self.collectionView.alwaysBounceVertical = YES;
-    [self.collectionView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"cell"];
-    [self.collectionView registerClass:[UICollectionReusableView class] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"header"];
-    [self.view addSubview:self.collectionView];
-
     self.section1Insets = UIEdgeInsetsMake(5.0, 100.0, 5.0, 20.0);
 }
 
@@ -51,8 +36,9 @@
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
-    UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"cell" forIndexPath:indexPath];
-    cell.backgroundColor = indexPath.item % 2 == 0 ? [UIColor darkGrayColor] : [UIColor lightGrayColor];
+    NSString *reuseIdentifier = indexPath.item % 2 == 0 ? @"lightGrayCell" : @"darkGrayCell";
+    ExampleCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
+    cell.label.text = @(indexPath.item).stringValue;
     return cell;
 }
 
@@ -95,13 +81,7 @@
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
     UICollectionReusableView *view = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:@"header" forIndexPath:indexPath];
-
     UILabel *label = view.subviews.firstObject;
-    if (!label) {
-        label = [[UILabel alloc] initWithFrame:view.bounds];
-        label.textColor = [UIColor whiteColor];
-        [view addSubview:label];
-    }
 
     if (indexPath.section == 0) {
         label.text = @"Section with multiple rows";

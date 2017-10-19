@@ -54,15 +54,44 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewFlowLayout *)layout
 {
-    NSAssert([layout isKindOfClass:UICollectionViewFlowLayout.class], @"%@ must be initialized with a UICollectionViewFlowLayout", NSStringFromClass(self.class));
-    layout.scrollDirection = UICollectionViewScrollDirectionVertical;
     if (self = [super initWithFrame:frame collectionViewLayout:layout]) {
-        self.controller = [[JEKScrollableCollectionViewController alloc] initWithCollectionView:self];
-        self.registeredCellClasses = [NSMutableDictionary new];
-        self.registeredCellNibs = [NSMutableDictionary new];
-        [super registerClass:JEKCollectionViewWrapperCell.class forCellWithReuseIdentifier:JEKCollectionViewWrapperCellIdentifier];
+        [self configure];
     }
     return self;
+}
+
+- (instancetype)initWithCoder:(NSCoder *)aDecoder
+{
+    if (self = [super initWithCoder:aDecoder]) {
+        [self configure];
+        [self registerStoryboardPrototypeCells];
+    }
+    return self;
+}
+
+/**
+ Accesses internal nib storage to register cells created in Storyboards.
+ */
+- (void)registerStoryboardPrototypeCells
+{
+    id cellNibDict = [self valueForKey:@"_cellNibDict"];
+    if ([cellNibDict isKindOfClass:[NSDictionary class]]) {
+        [cellNibDict enumerateKeysAndObjectsUsingBlock:^(NSString *key, UINib *nib, BOOL *stop) {
+            if ([key isKindOfClass:[NSString class]] && [nib isKindOfClass:[UINib class]]) {
+                [self registerNib:nib forCellWithReuseIdentifier:key];
+            }
+        }];
+    }
+}
+
+- (void)configure
+{
+    NSAssert([self.collectionViewLayout isKindOfClass:UICollectionViewFlowLayout.class], @"%@ must be initialized with a UICollectionViewFlowLayout", NSStringFromClass(self.class));
+    [(UICollectionViewFlowLayout *)self.collectionViewLayout setScrollDirection:UICollectionViewScrollDirectionVertical];
+    self.controller = [[JEKScrollableCollectionViewController alloc] initWithCollectionView:self];
+    self.registeredCellClasses = [NSMutableDictionary new];
+    self.registeredCellNibs = [NSMutableDictionary new];
+    [super registerClass:JEKCollectionViewWrapperCell.class forCellWithReuseIdentifier:JEKCollectionViewWrapperCellIdentifier];
 }
 
 - (void)setDelegate:(id<UICollectionViewDelegate>)delegate
@@ -84,6 +113,15 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 
 - (void)registerClass:(Class)cellClass forCellWithReuseIdentifier:(NSString *)identifier
 {
+    // When initializing from storyboards, Apple internally registers a class in initWithCoder:,
+    // which is before our own init functions has run.
+    // Trivia: the registered identifier is: @"com.apple.UIKit.shadowReuseCellIdentifier",
+    // and is the shadow used during drag and drop.
+    if (_registeredCellClasses == nil) {
+        [super registerClass:cellClass forCellWithReuseIdentifier:identifier];
+        return;
+    }
+
     _registeredCellClasses[identifier] = cellClass;
     [self updateRegistrationHash];
 }
