@@ -11,6 +11,9 @@
 
 @interface JEKScrollableSectionCollectionView : UICollectionView
 
+- (CGPoint)contentOffsetForSection:(NSInteger)section;
+- (void)setContentOffset:(CGPoint)contentOffset forSection:(NSInteger)section;
+
 @end
 
 @protocol JEKScrollableCollectionViewDelegate <UICollectionViewDelegate>

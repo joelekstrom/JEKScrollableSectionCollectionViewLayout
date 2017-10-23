@@ -180,6 +180,26 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
     [wrapperCell.collectionView deselectItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:0] animated:animated];
 }
 
+#pragma mark -
+
+- (CGPoint)contentOffsetForSection:(NSInteger)section
+{
+    JEKCollectionViewWrapperCell *cell = self.controller.visibleCells[@(section)];
+    if (cell) {
+        return cell.collectionView.contentOffset;
+    } else {
+        return CGPointZero;
+    }
+}
+
+- (void)setContentOffset:(CGPoint)contentOffset forSection:(NSInteger)section
+{
+    JEKCollectionViewWrapperCell *cell = self.controller.visibleCells[@(section)];
+    if (cell) {
+        cell.collectionView.contentOffset = contentOffset;
+    }
+}
+
 #pragma mark Updating content
 
 - (void)insertItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
