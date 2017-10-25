@@ -21,6 +21,8 @@
 @property (nonatomic, strong) NSIndexPath *queuedIndexPath;
 @property (nonatomic, assign) BOOL shouldAnimateScrollToQueuedIndexPath;
 
+@property (nonatomic, strong) NSMutableIndexSet *batchUpdateSectionChanges;
+
 @end
 
 @interface JEKScrollableCollectionViewController : NSObject <UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UICollectionViewDataSourcePrefetching>
@@ -220,6 +222,24 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 
 #pragma mark Updating content
 
+- (void)insertSections:(NSIndexSet *)sections
+{
+    [self.batchUpdateSectionChanges addIndexes:sections];
+    [super insertSections:sections];
+}
+
+- (void)deleteSections:(NSIndexSet *)sections
+{
+    [self.batchUpdateSectionChanges addIndexes:sections];
+    [super deleteSections:sections];
+}
+
+- (void)reloadSections:(NSIndexSet *)sections
+{
+    [self.batchUpdateSectionChanges addIndexes:sections];
+    [super reloadSections:sections];
+}
+
 - (void)insertItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
 {
     [self performSelector:_cmd forItemsAtIndexPaths:indexPaths];
@@ -267,9 +287,15 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 
 - (void)performBatchUpdates:(void (^)(void))updates completion:(void (^)(BOOL))completion
 {
+    self.batchUpdateSectionChanges = [NSMutableIndexSet new];
     [super performBatchUpdates:^{
         [self performBatchUpdatesInLastCell:self.controller.visibleCells.allValues updates:updates];
-    } completion:completion];
+    } completion:^(BOOL finished) {
+        self.batchUpdateSectionChanges = nil;
+        if (completion) {
+            completion(finished);
+        }
+    }];
 }
 
 /**
@@ -278,6 +304,14 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
  */
 - (void)performSelector:(SEL)selector forItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
 {
+    // If a section was inserted/deleted/updated during this batch update, we don't want to update rows into that section,
+    // since that is handled automatically. Clear all the indexPaths for affected sections
+    if (self.batchUpdateSectionChanges) {
+        indexPaths = [indexPaths filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(NSIndexPath *indexPath, NSDictionary<NSString *,id> * _Nullable bindings) {
+            return ![self.batchUpdateSectionChanges containsIndex:indexPath.section];
+        }]];
+    }
+
     [[self indexPathsGroupedBySection:indexPaths] enumerateKeysAndObjectsUsingBlock:^(NSNumber *section, NSArray<NSIndexPath *> *indexPaths, BOOL *stop) {
         JEKCollectionViewWrapperCell *cell = self.controller.visibleCells[section];
         if ([cell.collectionView respondsToSelector:selector]) {
