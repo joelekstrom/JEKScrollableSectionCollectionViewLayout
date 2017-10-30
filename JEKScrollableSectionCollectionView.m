@@ -33,17 +33,26 @@
 @property (nonatomic, weak) id<UICollectionViewDataSourcePrefetching> externalPrefetchingDataSource;
 @property (nonatomic, strong) NSMutableSet<NSIndexPath *> *selectedIndexPaths;
 @property (nonatomic, strong) NSMutableDictionary<NSNumber *, NSValue *> *contentOffsetCache;
-@property (nonatomic, strong) NSMutableDictionary<NSNumber *, JEKCollectionViewWrapperCell *> *visibleCells;
+@property (nonatomic, strong) NSMutableArray<JEKCollectionViewWrapperCell *> *visibleCells;
 
 - (instancetype)initWithCollectionView:(JEKScrollableSectionCollectionView *)collectionView;
+- (JEKCollectionViewWrapperCell *)visibleCellForSection:(NSInteger)section;
 
 @end
 
 static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollectionViewWrapperCellIdentifier";
 
+@interface JEKWrappedCollectionView : UICollectionView
+
+@property (nonatomic, weak) JEKCollectionViewWrapperCell *parentCell;
+@property (nonatomic, weak) JEKScrollableSectionCollectionView *parentCollectionView;
+@property (nonatomic, assign) NSInteger section;
+
+@end
+
 @interface JEKCollectionViewWrapperCell : UICollectionViewCell
 
-@property (nonatomic, strong) UICollectionView *collectionView;
+@property (nonatomic, strong) JEKWrappedCollectionView *collectionView;
 @property (nonatomic, assign) NSUInteger registrationHash;
 
 - (void)registerCellClasses:(NSDictionary<NSString *, Class> *)classes nibs:(NSDictionary<NSString *, UINib *> *)nibs;
@@ -145,13 +154,13 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
         return [super dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
     }
 
-    JEKCollectionViewWrapperCell *cell = self.controller.visibleCells[@(indexPath.section)];
+    JEKCollectionViewWrapperCell *cell = [self.controller visibleCellForSection:indexPath.section];
     return [cell.collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:0]];
 }
 
 - (UICollectionViewCell *)cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    JEKCollectionViewWrapperCell *wrapperCell = self.controller.visibleCells[@(indexPath.section)];
+    JEKCollectionViewWrapperCell *wrapperCell = [self.controller visibleCellForSection:indexPath.section];
     return [wrapperCell.collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:0]];
 }
 
@@ -183,7 +192,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
     if ([cell.superview.superview isKindOfClass:JEKCollectionViewWrapperCell.class]) {
         JEKCollectionViewWrapperCell *wrapperCell = (JEKCollectionViewWrapperCell *)cell.superview.superview;
         NSIndexPath *indexPath = [wrapperCell.collectionView indexPathForCell:cell];
-        return [NSIndexPath indexPathForItem:indexPath.item inSection:wrapperCell.collectionView.tag];
+        return [NSIndexPath indexPathForItem:indexPath.item inSection:wrapperCell.collectionView.section];
     }
     return nil;
 }
@@ -193,7 +202,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
     NSIndexPath *outerIndexPath = [NSIndexPath indexPathForItem:0 inSection:indexPath.section];
     NSIndexPath *innerIndexPath = [NSIndexPath indexPathForItem:indexPath.item inSection:0];
     [super scrollToItemAtIndexPath:outerIndexPath atScrollPosition:UICollectionViewScrollPositionCenteredVertically animated:animated];
-    JEKCollectionViewWrapperCell *cell = self.controller.visibleCells[@(indexPath.section)];
+    JEKCollectionViewWrapperCell *cell = [self.controller visibleCellForSection:indexPath.section];
     if (cell) {
         [cell.collectionView scrollToItemAtIndexPath:innerIndexPath atScrollPosition:scrollPosition animated:animated];
     } else {
@@ -205,7 +214,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 - (void)selectItemAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UICollectionViewScrollPosition)scrollPosition
 {
     [self.controller.selectedIndexPaths addObject:indexPath];
-    JEKCollectionViewWrapperCell *wrapperCell = self.controller.visibleCells[@(indexPath.section)];
+    JEKCollectionViewWrapperCell *wrapperCell = [self.controller visibleCellForSection:indexPath.section];
     [wrapperCell.collectionView selectItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:0] animated:animated scrollPosition:scrollPosition];
 
     if (scrollPosition != UICollectionViewScrollPositionNone) {
@@ -216,7 +225,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 - (void)deselectItemAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated
 {
     [self.controller.selectedIndexPaths removeObject:indexPath];
-    JEKCollectionViewWrapperCell *wrapperCell = self.controller.visibleCells[@(indexPath.section)];
+    JEKCollectionViewWrapperCell *wrapperCell = [self.controller visibleCellForSection:indexPath.section];
     [wrapperCell.collectionView deselectItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:0] animated:animated];
 }
 
@@ -257,13 +266,13 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 
 - (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
 {
-    JEKCollectionViewWrapperCell *cell = self.controller.visibleCells[@(indexPath.section)];
+    JEKCollectionViewWrapperCell *cell = [self.controller visibleCellForSection:indexPath.section];
     if (indexPath.section == newIndexPath.section) {
         // When moving within a single section, we can just forward the move to the child collection view
         [cell.collectionView moveItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:0] toIndexPath:[NSIndexPath indexPathForItem:newIndexPath.item inSection:0]];
     } else {
         // Otherwise, we use delete/insert instead in the respective cells
-        JEKCollectionViewWrapperCell *cell2 = self.controller.visibleCells[@(indexPath.section)];
+        JEKCollectionViewWrapperCell *cell2 = [self.controller visibleCellForSection:indexPath.section];
         [cell.collectionView deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:indexPath.item inSection:0]]];
         [cell2.collectionView insertItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:newIndexPath.item inSection:0]]];
     }
@@ -289,7 +298,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 {
     self.batchUpdateSectionChanges = [NSMutableIndexSet new];
     [super performBatchUpdates:^{
-        [self performBatchUpdatesInLastCell:self.controller.visibleCells.allValues updates:updates];
+        [self performBatchUpdatesInLastCell:self.controller.visibleCells updates:updates];
     } completion:^(BOOL finished) {
         self.batchUpdateSectionChanges = nil;
         if (completion) {
@@ -313,7 +322,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
     }
 
     [[self indexPathsGroupedBySection:indexPaths] enumerateKeysAndObjectsUsingBlock:^(NSNumber *section, NSArray<NSIndexPath *> *indexPaths, BOOL *stop) {
-        JEKCollectionViewWrapperCell *cell = self.controller.visibleCells[section];
+        JEKCollectionViewWrapperCell *cell = [self.controller visibleCellForSection:section.integerValue];
         if ([cell.collectionView respondsToSelector:selector]) {
             IMP imp = [cell.collectionView methodForSelector:selector];
             void (*functionPtr)(id, SEL, NSArray<NSIndexPath *> *) = (void *)imp;
@@ -357,9 +366,19 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
         self.collectionView = collectionView;
         self.selectedIndexPaths = [NSMutableSet new];
         self.contentOffsetCache = [NSMutableDictionary new];
-        self.visibleCells = [NSMutableDictionary new];
+        self.visibleCells = [NSMutableArray new];
     }
     return self;
+}
+
+- (JEKCollectionViewWrapperCell *)visibleCellForSection:(NSInteger)section
+{
+    for (JEKCollectionViewWrapperCell *cell in self.visibleCells) {
+        if (cell.collectionView.section == section) {
+            return cell;
+        }
+    }
+    return nil;
 }
 
 #pragma mark - UICollectionViewDataSource
@@ -377,21 +396,22 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
     if (collectionView == self.collectionView) {
         return 1;
     }
-    return [self.externalDataSource collectionView:self.collectionView numberOfItemsInSection:collectionView.tag];
+    return [self.externalDataSource collectionView:self.collectionView numberOfItemsInSection:[(JEKWrappedCollectionView *)collectionView section]];
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
     if (collectionView == self.collectionView) {
         JEKCollectionViewWrapperCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:JEKCollectionViewWrapperCellIdentifier forIndexPath:indexPath];
-        cell.collectionView.tag = indexPath.section;
+        cell.collectionView.section = indexPath.section;
+        cell.collectionView.parentCollectionView = self.collectionView;
         if (cell.registrationHash != self.collectionView.registrationHash) {
             [cell registerCellClasses:self.collectionView.registeredCellClasses nibs:self.collectionView.registeredCellNibs];
             cell.registrationHash = self.collectionView.registrationHash;
         }
         return cell;
     }
-    return [self.externalDataSource collectionView:self.collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:collectionView.tag]];
+    return [self.externalDataSource collectionView:self.collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:[(JEKWrappedCollectionView *)collectionView section]]];;
 }
 
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
@@ -409,7 +429,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
     if ([self.externalPrefetchingDataSource respondsToSelector:_cmd]) {
         NSMutableArray *transformedIndexPaths = [NSMutableArray new];
         for (NSIndexPath *indexPath in indexPaths) {
-            [transformedIndexPaths addObject:[NSIndexPath indexPathForItem:indexPath.section inSection:collectionView.tag]];
+            [transformedIndexPaths addObject:[NSIndexPath indexPathForItem:indexPath.section inSection:[(JEKWrappedCollectionView *)collectionView section]]];
         }
         [self.externalPrefetchingDataSource collectionView:self.collectionView prefetchItemsAtIndexPaths:[transformedIndexPaths copy]];
     }
@@ -420,7 +440,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
     if ([self.externalPrefetchingDataSource respondsToSelector:_cmd]) {
         NSMutableArray *transformedIndexPaths = [NSMutableArray new];
         for (NSIndexPath *indexPath in indexPaths) {
-            [transformedIndexPaths addObject:[NSIndexPath indexPathForItem:indexPath.section inSection:collectionView.tag]];
+            [transformedIndexPaths addObject:[NSIndexPath indexPathForItem:indexPath.section inSection:[(JEKWrappedCollectionView *)collectionView section]]];
         }
         [self.externalPrefetchingDataSource collectionView:self.collectionView cancelPrefetchingForItemsAtIndexPaths:[transformedIndexPaths copy]];
     }
@@ -442,7 +462,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
     if ([self.externalDelegate respondsToSelector:_cmd]) {
         return [self.externalDelegate collectionView:self.collectionView
                                               layout:self.collectionView.collectionViewLayout
-                              sizeForItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:collectionView.tag]];
+                              sizeForItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:[(JEKWrappedCollectionView *)collectionView section]]];
     }
 
     return [(UICollectionViewFlowLayout *)self.collectionView.collectionViewLayout itemSize];
@@ -479,7 +499,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
     // Call the inter-item spacing function of the delegate instead, since that's what you expect from a vertical collection view.
     // The inner collection views are actually horizontal, but that's unknown outside this class
     if ([self.externalDelegate respondsToSelector:@selector(collectionView:layout:minimumInteritemSpacingForSectionAtIndex:)]) {
-        return [self.externalDelegate collectionView:self.collectionView layout:self.collectionView.collectionViewLayout minimumInteritemSpacingForSectionAtIndex:collectionView.tag];
+        return [self.externalDelegate collectionView:self.collectionView layout:self.collectionView.collectionViewLayout minimumInteritemSpacingForSectionAtIndex:[(JEKWrappedCollectionView *)collectionView section]];
     }
 
     return [(UICollectionViewFlowLayout *)self.collectionView.collectionViewLayout minimumInteritemSpacing];
@@ -493,7 +513,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 
     // Use minimumLineSpacing instead. See comment in minimumLineSpacing for more info
     if ([self.externalDelegate respondsToSelector:@selector(collectionView:layout:minimumLineSpacingForSectionAtIndex:)]) {
-        return [self.externalDelegate collectionView:self.collectionView layout:self.collectionView.collectionViewLayout minimumLineSpacingForSectionAtIndex:collectionView.tag];
+        return [self.externalDelegate collectionView:self.collectionView layout:self.collectionView.collectionViewLayout minimumLineSpacingForSectionAtIndex:[(JEKWrappedCollectionView *)collectionView section]];
     }
 
     return [(UICollectionViewFlowLayout *)self.collectionView.collectionViewLayout minimumLineSpacing];
@@ -507,7 +527,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
     }
 
     if ([self.externalDelegate respondsToSelector:_cmd]) {
-        return [self.externalDelegate collectionView:collectionView layout:self.collectionView.collectionViewLayout insetForSectionAtIndex:collectionView.tag];
+        return [self.externalDelegate collectionView:collectionView layout:self.collectionView.collectionViewLayout insetForSectionAtIndex:[(JEKWrappedCollectionView *)collectionView section]];
     }
 
     return [(UICollectionViewFlowLayout *)self.collectionView.collectionViewLayout sectionInset];
@@ -523,26 +543,26 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
         wrapperCell.collectionView.allowsMultipleSelection = collectionView.allowsMultipleSelection;
         wrapperCell.collectionView.allowsSelection = collectionView.allowsSelection;
         wrapperCell.collectionView.showsHorizontalScrollIndicator = self.collectionView.showsHorizontalScrollIndicator;
-        self.visibleCells[@(indexPath.section)] = wrapperCell;
+        [self.visibleCells addObject:wrapperCell];
         [wrapperCell.collectionView reloadData];
 
         NSValue *contentOffset = self.contentOffsetCache[@(indexPath.section)];
-        wrapperCell.collectionView.contentOffset = contentOffset ? contentOffset.CGPointValue : CGPointZero;
+        [wrapperCell.collectionView setContentOffset:contentOffset ? contentOffset.CGPointValue : CGPointZero animated:NO];
 
         for (NSIndexPath *indexPath in self.selectedIndexPaths) {
-            if (indexPath.section == wrapperCell.collectionView.tag) {
+            if (indexPath.section == wrapperCell.collectionView.section) {
                 [wrapperCell.collectionView selectItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:0] animated:NO scrollPosition:UICollectionViewScrollPositionNone];
             }
         }
 
-        if (self.collectionView.queuedIndexPath && self.collectionView.queuedIndexPath.section == wrapperCell.collectionView.tag) {
+        if (self.collectionView.queuedIndexPath && self.collectionView.queuedIndexPath.section == wrapperCell.collectionView.section) {
             [wrapperCell.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.collectionView.queuedIndexPath.item inSection:0]
                                                atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally
                                                        animated:self.collectionView.shouldAnimateScrollToQueuedIndexPath];
             self.collectionView.queuedIndexPath = nil;
         }
     } else if ([self.externalDelegate respondsToSelector:_cmd]) {
-        [self.externalDelegate collectionView:self.collectionView willDisplayCell:cell forItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:collectionView.tag]];
+        [self.externalDelegate collectionView:self.collectionView willDisplayCell:cell forItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:[(JEKWrappedCollectionView *)collectionView section]]];
     }
 }
 
@@ -560,11 +580,9 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
             [wrapperCell.collectionView deselectItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:0] animated:NO];
         }
 
-        if (self.visibleCells[section] == wrapperCell) {
-            self.visibleCells[section] = nil;
-        }
+        [self.visibleCells removeObject:wrapperCell];
     } else if ([self.externalDelegate respondsToSelector:_cmd]) {
-        [self.externalDelegate collectionView:self.collectionView didEndDisplayingCell:cell forItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:collectionView.tag]];
+        [self.externalDelegate collectionView:self.collectionView didEndDisplayingCell:cell forItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:[(JEKWrappedCollectionView *)collectionView section]]];
     }
 }
 
@@ -587,7 +605,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
     if (collectionView == self.collectionView) {
         return NO;
     } else if ([self.externalDelegate respondsToSelector:_cmd]) {
-        return [self.externalDelegate collectionView:self.collectionView shouldHighlightItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:collectionView.tag]];
+        return [self.externalDelegate collectionView:self.collectionView shouldHighlightItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:[(JEKWrappedCollectionView *)collectionView section]]];
     }
     return YES;
 }
@@ -597,7 +615,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
     if (collectionView == self.collectionView) {
         return NO;
     } else if ([self.externalDelegate respondsToSelector:_cmd]) {
-        return [self.externalDelegate collectionView:self.collectionView shouldSelectItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:collectionView.tag]];
+        return [self.externalDelegate collectionView:self.collectionView shouldSelectItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:[(JEKWrappedCollectionView *)collectionView section]]];
     }
     return YES;
 }
@@ -605,14 +623,14 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldDeselectItemAtIndexPath:(NSIndexPath *)indexPath
 {
     if ([self.externalDelegate respondsToSelector:_cmd]) {
-        return [self.externalDelegate collectionView:self.collectionView shouldDeselectItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:collectionView.tag]];
+        return [self.externalDelegate collectionView:self.collectionView shouldDeselectItemAtIndexPath:[NSIndexPath indexPathForItem:indexPath.item inSection:[(JEKWrappedCollectionView *)collectionView section]]];
     }
     return YES;
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSIndexPath *externalIndexPath = [NSIndexPath indexPathForItem:indexPath.item inSection:collectionView.tag];
+    NSIndexPath *externalIndexPath = [NSIndexPath indexPathForItem:indexPath.item inSection:[(JEKWrappedCollectionView *)collectionView section]];
     NSIndexPath *previousSelection = [self.selectedIndexPaths anyObject];
 
     if (!self.collectionView.allowsMultipleSelection && previousSelection && ![previousSelection isEqual:externalIndexPath]) {
@@ -628,7 +646,7 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 
 - (void)collectionView:(UICollectionView *)collectionView didDeselectItemAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
-    NSIndexPath *externalIndexPath = [NSIndexPath indexPathForItem:indexPath.item inSection:collectionView.tag];
+    NSIndexPath *externalIndexPath = [NSIndexPath indexPathForItem:indexPath.item inSection:[(JEKWrappedCollectionView *)collectionView section]];
     [self.selectedIndexPaths removeObject:externalIndexPath];
     if ([self.externalDelegate respondsToSelector:_cmd]) {
         [self.externalDelegate collectionView:self.collectionView didDeselectItemAtIndexPath:externalIndexPath];
@@ -646,10 +664,11 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
     if (self = [super initWithFrame:frame]) {
         UICollectionViewFlowLayout *layout = [UICollectionViewFlowLayout new];
         layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
-        self.collectionView = [[UICollectionView alloc] initWithFrame:self.contentView.bounds collectionViewLayout:layout];
+        self.collectionView = [[JEKWrappedCollectionView alloc] initWithFrame:self.contentView.bounds collectionViewLayout:layout];
         self.collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         self.collectionView.alwaysBounceHorizontal = YES;
         self.collectionView.backgroundColor = [UIColor clearColor];
+        self.collectionView.parentCell = self;
         [self.contentView addSubview:self.collectionView];
     }
     return self;
@@ -664,6 +683,33 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
     [nibs enumerateKeysAndObjectsUsingBlock:^(NSString *identifier, UINib *nib, BOOL * _Nonnull stop) {
         [self.collectionView registerNib:nib forCellWithReuseIdentifier:identifier];
     }];
+}
+
+@end
+
+#pragma mark -
+
+@implementation JEKWrappedCollectionView
+
+@synthesize section = _section;
+
+- (void)setSection:(NSInteger)section
+{
+    _section = section;
+}
+
+- (NSInteger)section
+{
+    NSIndexPath *indexPath = [self.parentCollectionView indexPathForCell:self.parentCell];
+
+    // Sometimes, UICollectionView will prepare cells before adding them as subviews,
+    // which means that wrapped collection views will request cells before they are added
+    // to the main collection view. This in turn means that the parent collection view will return
+    // nil in indexPathForCell: above.
+    //
+    // To solve this, we can used the stored section from willDisplayCell: instead, however this one
+    // is unsafe in other cases, because it will be outdated if a previous section is deleted or inserted.
+    return indexPath ? indexPath.section : _section;
 }
 
 @end
