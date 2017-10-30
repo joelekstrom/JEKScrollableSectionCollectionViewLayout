@@ -573,7 +573,6 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
         NSNumber *section = @(indexPath.section);
         self.contentOffsetCache[section] = [NSValue valueWithCGPoint:wrapperCell.collectionView.contentOffset];
         wrapperCell.collectionView.dataSource = nil;
-        wrapperCell.collectionView.delegate = nil;
         wrapperCell.collectionView.prefetchDataSource = nil;
 
         for (NSIndexPath *indexPath in wrapperCell.collectionView.indexPathsForSelectedItems) {
