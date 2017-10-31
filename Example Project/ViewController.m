@@ -13,6 +13,7 @@
 @interface ViewController () <UICollectionViewDelegateFlowLayout>
 
 @property (nonatomic, assign) UIEdgeInsets section1Insets;
+@property (nonatomic, strong) NSArray<NSMutableArray<NSNumber *> *> *testData;
 
 @end
 
@@ -22,23 +23,45 @@
 {
     [super viewDidLoad];
     self.section1Insets = UIEdgeInsetsMake(5.0, 100.0, 5.0, 20.0);
+    self.testData = [self generateTestData];
+}
+
+- (NSArray *)generateTestData
+{
+    // Create 20 sections with a random amount of items in each
+    NSMutableArray *sections = [NSMutableArray new];
+    for (NSInteger section = 0; section < 20; section++) {
+        NSMutableArray *sectionArray = [NSMutableArray new];
+        [sections addObject:sectionArray];
+        NSInteger numberOfItems = 20 + arc4random_uniform(50);
+        for (NSInteger item = 0; item < numberOfItems; item++) {
+            [sectionArray addObject:@(item)];
+        }
+    }
+    return [sections copy];
+}
+
+- (NSNumber *)itemAtIndexPath:(NSIndexPath *)indexPath
+{
+    return self.testData[indexPath.section][indexPath.item];
 }
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
 {
-    return 20;
+    return self.testData.count;
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
-    return 50;
+    return self.testData[section].count;
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
-    NSString *reuseIdentifier = indexPath.item % 2 == 0 ? @"lightGrayCell" : @"darkGrayCell";
+    NSNumber *item = [self itemAtIndexPath:indexPath];
+    NSString *reuseIdentifier = item.integerValue % 2 == 0 ? @"lightGrayCell" : @"darkGrayCell";
     ExampleCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
-    cell.label.text = @(indexPath.item).stringValue;
+    cell.label.text = item.stringValue;
     return cell;
 }
 
