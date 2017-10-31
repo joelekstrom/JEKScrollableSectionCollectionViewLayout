@@ -9,6 +9,7 @@
 #import "JEKScrollableSectionCollectionView.h"
 
 @class JEKScrollableCollectionViewController;
+@class JEKScrollableCollectionViewBatchUpdates;
 @class JEKCollectionViewWrapperCell;
 
 @interface JEKScrollableSectionCollectionView()
@@ -21,7 +22,7 @@
 @property (nonatomic, strong) NSIndexPath *queuedIndexPath;
 @property (nonatomic, assign) BOOL shouldAnimateScrollToQueuedIndexPath;
 
-@property (nonatomic, strong) NSMutableIndexSet *batchUpdateSectionChanges;
+@property (nonatomic, strong) JEKScrollableCollectionViewBatchUpdates *batchUpdates;
 
 @end
 
@@ -56,6 +57,25 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 @property (nonatomic, assign) NSUInteger registrationHash;
 
 - (void)registerCellClasses:(NSDictionary<NSString *, Class> *)classes nibs:(NSDictionary<NSString *, UINib *> *)nibs;
+
+@end
+
+@interface JEKScrollableCollectionViewBatchUpdates : NSObject
+
+@property (nonatomic, strong) NSMutableIndexSet *deletedSections;
+@property (nonatomic, strong) NSMutableIndexSet *insertedSections;
+@property (nonatomic, strong) NSMutableIndexSet *reloadedSections;
+@property (nonatomic, strong) NSMutableDictionary<NSNumber *, NSNumber *> *movedSections;
+
+@property (nonatomic, strong) NSMutableArray<NSIndexPath *> *deletedItems;
+@property (nonatomic, strong) NSMutableArray<NSIndexPath *> *insertedItems;
+@property (nonatomic, strong) NSMutableArray<NSIndexPath *> *reloadedItems;
+@property (nonatomic, strong) NSMutableDictionary<NSIndexPath *, NSIndexPath *> *movedItems;
+
+- (void)curate;
+
+@property (nonatomic, readonly) BOOL hasSectionUpdates;
+@property (nonatomic, readonly) BOOL hasItemUpdates;
 
 @end
 
@@ -240,48 +260,82 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 
 - (void)insertSections:(NSIndexSet *)sections
 {
-    [self.batchUpdateSectionChanges addIndexes:sections];
-    [super insertSections:sections];
+    if (self.batchUpdates) {
+        [self.batchUpdates.insertedSections addIndexes:sections];
+    } else {
+        [super insertSections:sections];
+    }
 }
 
 - (void)deleteSections:(NSIndexSet *)sections
 {
-    [self.batchUpdateSectionChanges addIndexes:sections];
-    [super deleteSections:sections];
+    if (self.batchUpdates) {
+        [self.batchUpdates.deletedSections addIndexes:sections];
+    } else {
+        [super deleteSections:sections];
+    }
 }
 
 - (void)reloadSections:(NSIndexSet *)sections
 {
-    [self.batchUpdateSectionChanges addIndexes:sections];
-    [super reloadSections:sections];
+    if (self.batchUpdates) {
+        [self.batchUpdates.reloadedSections addIndexes:sections];
+    } else {
+        [super reloadSections:sections];
+    }
+}
+
+- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection
+{
+    if (self.batchUpdates) {
+        self.batchUpdates.movedSections[@(section)] = @(newSection);
+    } else {
+        [super moveSection:section toSection:newSection];
+    }
 }
 
 - (void)insertItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
-{
-    [self performSelector:_cmd forItemsAtIndexPaths:indexPaths];
+ {
+    if (self.batchUpdates) {
+        [self.batchUpdates.insertedItems addObjectsFromArray:indexPaths];
+    } else {
+        [self performSelector:_cmd forItemsAtIndexPaths:indexPaths];
+    }
 }
 
 - (void)deleteItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
 {
-    [self performSelector:_cmd forItemsAtIndexPaths:indexPaths];
+    if (self.batchUpdates) {
+        [self.batchUpdates.deletedItems addObjectsFromArray:indexPaths];
+    } else {
+        [self performSelector:_cmd forItemsAtIndexPaths:indexPaths];
+    }
 }
 
 - (void)reloadItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
 {
-    [self performSelector:_cmd forItemsAtIndexPaths:indexPaths];
+    if (self.batchUpdates) {
+        [self.batchUpdates.reloadedItems addObjectsFromArray:indexPaths];
+    } else {
+        [self performSelector:_cmd forItemsAtIndexPaths:indexPaths];
+    }
 }
 
 - (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
 {
-    JEKCollectionViewWrapperCell *cell = [self.controller visibleCellForSection:indexPath.section];
-    if (indexPath.section == newIndexPath.section) {
-        // When moving within a single section, we can just forward the move to the child collection view
-        [cell.collectionView moveItemAtIndexPath:indexPath.normalize toIndexPath:newIndexPath.normalize];
+    if (self.batchUpdates) {
+        self.batchUpdates.movedItems[indexPath] = newIndexPath;
     } else {
-        // Otherwise, we use delete/insert instead in the respective cells
-        JEKCollectionViewWrapperCell *cell2 = [self.controller visibleCellForSection:indexPath.section];
-        [cell.collectionView deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:indexPath.item inSection:0]]];
-        [cell2.collectionView insertItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:newIndexPath.item inSection:0]]];
+        JEKCollectionViewWrapperCell *cell = [self.controller visibleCellForSection:indexPath.section];
+        if (indexPath.section == newIndexPath.section) {
+            // When moving within a single section, we can just forward the move to the child collection view
+            [cell.collectionView moveItemAtIndexPath:indexPath.normalize toIndexPath:newIndexPath.normalize];
+        } else {
+            // Otherwise, we use delete/insert instead in the respective cells
+            JEKCollectionViewWrapperCell *cell2 = [self.controller visibleCellForSection:indexPath.section];
+            [cell.collectionView deleteItemsAtIndexPaths:@[indexPath.normalize]];
+            [cell2.collectionView insertItemsAtIndexPaths:@[newIndexPath.normalize]];
+        }
     }
 }
 
@@ -290,11 +344,11 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
  This function recursively begins performing batch updates on an array of cells, and runs the
  update block in the last one
  */
-- (void)performBatchUpdatesInLastCell:(NSArray<JEKCollectionViewWrapperCell *> *)cells updates:(void (^)(void))updates
+- (void)performBatchUpdatesInCells:(NSArray<JEKCollectionViewWrapperCell *> *)cells updates:(void (^)(void))updates
 {
     if (cells.count > 0) {
         [cells.firstObject.collectionView performBatchUpdates:^{
-            [self performBatchUpdatesInLastCell:[cells subarrayWithRange:NSMakeRange(1, cells.count - 1)] updates:updates];
+            [self performBatchUpdatesInCells:[cells subarrayWithRange:NSMakeRange(1, cells.count - 1)] updates:updates];
         } completion:nil];
     } else {
         updates();
@@ -303,15 +357,40 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
 
 - (void)performBatchUpdates:(void (^)(void))updates completion:(void (^)(BOOL))completion
 {
-    self.batchUpdateSectionChanges = [NSMutableIndexSet new];
-    [super performBatchUpdates:^{
-        [self performBatchUpdatesInLastCell:self.controller.visibleCells updates:updates];
-    } completion:^(BOOL finished) {
-        self.batchUpdateSectionChanges = nil;
-        if (completion) {
-            completion(finished);
-        }
-    }];
+    JEKScrollableCollectionViewBatchUpdates *batchUpdates = [JEKScrollableCollectionViewBatchUpdates new];
+    self.batchUpdates = batchUpdates;
+    updates();
+    self.batchUpdates = nil;
+    [batchUpdates curate];
+
+    // Doing both section changes and item changes is very complicated, since that needs that both the outer and inner collection views
+    // somehow need to synchronize their batch updates. To keep things simple, we only do one or the other, or if both,
+    // just reload data and a cross dissolve transition
+    if (batchUpdates.hasSectionUpdates && batchUpdates.hasItemUpdates) {
+        [self reloadData];
+        [UIView transitionWithView:self duration:0.3 options:UIViewAnimationOptionTransitionCrossDissolve animations:nil completion:completion];
+    } else if (batchUpdates.hasSectionUpdates) {
+        [super performBatchUpdates:^{
+            [self deleteSections:batchUpdates.deletedSections];
+            [self insertSections:batchUpdates.insertedSections];
+            [self reloadSections:batchUpdates.reloadedSections];
+            [batchUpdates.movedSections enumerateKeysAndObjectsUsingBlock:^(NSNumber *fromSection, NSNumber *toSection, BOOL *stop) {
+                [self moveSection:fromSection.integerValue toSection:toSection.integerValue];
+            }];
+        } completion:completion];
+    } else if (batchUpdates.hasItemUpdates) {
+        [self performBatchUpdatesInCells:self.controller.visibleCells updates:^{
+            [self deleteItemsAtIndexPaths:batchUpdates.deletedItems];
+            [self insertItemsAtIndexPaths:batchUpdates.insertedItems];
+            [self reloadItemsAtIndexPaths:batchUpdates.reloadedItems];
+            [batchUpdates.movedItems enumerateKeysAndObjectsUsingBlock:^(NSIndexPath *fromIndexPath, NSIndexPath *toIndexPath, BOOL * _Nonnull stop) {
+                [self moveItemAtIndexPath:fromIndexPath toIndexPath:toIndexPath];
+            }];
+            if (completion) {
+                completion(YES);
+            }
+        }];
+    }
 }
 
 /**
@@ -320,14 +399,6 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
  */
 - (void)performSelector:(SEL)selector forItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
 {
-    // If a section was inserted/deleted/updated during this batch update, we don't want to update rows into that section,
-    // since that is handled automatically. Clear all the indexPaths for affected sections
-    if (self.batchUpdateSectionChanges) {
-        indexPaths = [indexPaths filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(NSIndexPath *indexPath, NSDictionary<NSString *,id> * _Nullable bindings) {
-            return ![self.batchUpdateSectionChanges containsIndex:indexPath.section];
-        }]];
-    }
-
     [[self indexPathsGroupedBySection:indexPaths] enumerateKeysAndObjectsUsingBlock:^(NSNumber *section, NSArray<NSIndexPath *> *indexPaths, BOOL *stop) {
         JEKCollectionViewWrapperCell *cell = [self.controller visibleCellForSection:section.integerValue];
         if ([cell.collectionView respondsToSelector:selector]) {
@@ -716,6 +787,54 @@ static NSString * const JEKCollectionViewWrapperCellIdentifier = @"JEKCollection
     // To solve this, we can used the stored section from willDisplayCell: instead, however this one
     // is unsafe in other cases, because it will be outdated if a previous section is deleted or inserted.
     return indexPath ? indexPath.section : _section;
+}
+
+@end
+
+#pragma mark -
+
+@implementation JEKScrollableCollectionViewBatchUpdates
+
+- (instancetype)init
+{
+    if (self = [super init]) {
+        self.deletedSections = [NSMutableIndexSet new];
+        self.insertedSections = [NSMutableIndexSet new];
+        self.reloadedSections = [NSMutableIndexSet new];
+        self.movedSections = [NSMutableDictionary new];
+        self.deletedItems = [NSMutableArray new];
+        self.insertedItems = [NSMutableArray new];
+        self.reloadedItems = [NSMutableArray new];
+        self.movedItems = [NSMutableDictionary new];
+    }
+    return self;
+}
+
+/**
+ Any insertions into inserted sections (or deletions from deleted sections),
+ can be skipped, because UICollectionView will insert all rows when a section is inserted.
+ This function removes all unneeded updates, because they can cause problems when collection views
+ are reused.
+ */
+- (void)curate
+{
+    [self.deletedItems filterUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(NSIndexPath *indexPath, NSDictionary<NSString *,id> * _Nullable bindings) {
+        return !([self.deletedSections containsIndex:indexPath.section] || [self.reloadedSections containsIndex:indexPath.section]);
+    }]];
+
+    [self.insertedItems filterUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(NSIndexPath *indexPath, NSDictionary<NSString *,id> * _Nullable bindings) {
+        return !([self.insertedSections containsIndex:indexPath.section] || [self.reloadedSections containsIndex:indexPath.section]);
+    }]];
+}
+
+- (BOOL)hasSectionUpdates
+{
+    return self.insertedSections.count > 0 || self.deletedSections.count > 0 || self.reloadedSections.count > 0 || self.movedSections.count > 0;
+}
+
+- (BOOL)hasItemUpdates
+{
+    return self.insertedItems.count > 0 || self.deletedItems.count > 0 || self.reloadedItems.count > 0 || self.movedItems.count > 0;
 }
 
 @end
