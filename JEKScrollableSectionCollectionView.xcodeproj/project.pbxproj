@@ -18,6 +18,7 @@
 		5D3B43811F95F6B7006B8B8E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5D3B43741F95F614006B8B8E /* Main.storyboard */; };
 		5D76E78B1F975409003E9DA6 /* JEKScrollableSectionCollectionView.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 5D3B435B1F95F50E006B8B8E /* JEKScrollableSectionCollectionView.h */; };
 		5D99484C1F988FCC008DF84C /* ExampleCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D99484B1F988FCC008DF84C /* ExampleCell.m */; };
+		5DB90F9621007BB2007A137D /* JEKScrollableSectionCollectionViewLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 5DB90F9521007BB2007A137D /* JEKScrollableSectionCollectionViewLayout.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -59,6 +60,8 @@
 		5D8FEDCE1F463D0300857A7E /* Example Project.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Example Project.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5D99484A1F988FCC008DF84C /* ExampleCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ExampleCell.h; path = "Example Project/ExampleCell.h"; sourceTree = "<group>"; };
 		5D99484B1F988FCC008DF84C /* ExampleCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = ExampleCell.m; path = "Example Project/ExampleCell.m"; sourceTree = "<group>"; };
+		5DB90F9421007BB2007A137D /* JEKScrollableSectionCollectionViewLayout.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JEKScrollableSectionCollectionViewLayout.h; sourceTree = "<group>"; };
+		5DB90F9521007BB2007A137D /* JEKScrollableSectionCollectionViewLayout.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JEKScrollableSectionCollectionViewLayout.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,6 +115,8 @@
 			children = (
 				5D3B435B1F95F50E006B8B8E /* JEKScrollableSectionCollectionView.h */,
 				5D3B435A1F95F50E006B8B8E /* JEKScrollableSectionCollectionView.m */,
+				5DB90F9421007BB2007A137D /* JEKScrollableSectionCollectionViewLayout.h */,
+				5DB90F9521007BB2007A137D /* JEKScrollableSectionCollectionViewLayout.m */,
 				5D0344AC1F543D2B0050DE76 /* Example Project */,
 				5D8FEDCF1F463D0300857A7E /* Products */,
 			);
@@ -234,6 +239,7 @@
 				5D3B435C1F95F50E006B8B8E /* JEKScrollableSectionCollectionView.m in Sources */,
 				5D99484C1F988FCC008DF84C /* ExampleCell.m in Sources */,
 				5D3B437B1F95F614006B8B8E /* main.m in Sources */,
+				5DB90F9621007BB2007A137D /* JEKScrollableSectionCollectionViewLayout.m in Sources */,
 				5D3B436A1F95F559006B8B8E /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -7,7 +7,7 @@
 //
 
 #import "ViewController.h"
-#import "JEKScrollableSectionCollectionView.h"
+#import "JEKScrollableSectionCollectionViewLayout.h"
 #import "ExampleCell.h"
 
 @interface ViewController () <UICollectionViewDelegateFlowLayout>
@@ -22,6 +22,9 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    JEKScrollableSectionCollectionViewLayout *layout = (JEKScrollableSectionCollectionViewLayout *)self.collectionViewLayout;
+    layout.itemSize = CGSizeMake(80.0, 80.0);
+    layout.headerReferenceSize = CGSizeMake(100.0, 50.0);
     self.section1Insets = UIEdgeInsetsMake(5.0, 100.0, 5.0, 20.0);
     self.testData = [self generateTestData];
 }
@@ -73,15 +76,15 @@
     return UIEdgeInsetsZero;
 }
 
-- (CGFloat)collectionView:(JEKScrollableSectionCollectionView *)collectionView heightForSectionAtIndex:(NSInteger)section
+- (CGFloat)collectionView:(UICollectionView *)collectionView heightForSectionAtIndex:(NSInteger)section
 {
-    UICollectionViewFlowLayout *flowLayout = (UICollectionViewFlowLayout *)collectionView.collectionViewLayout;
+    JEKScrollableSectionCollectionViewLayout *layout = (JEKScrollableSectionCollectionViewLayout *)collectionView.collectionViewLayout;
     if (section == 0) {
-        return flowLayout.itemSize.height * 3 + 10.0; // 10.0 is the line spacing, (5.0 * 2)
+        return layout.itemSize.height * 3 + 10.0; // 10.0 is the line spacing, (5.0 * 2)
     } else if (section == 1) {
-        return flowLayout.itemSize.height + _section1Insets.top + _section1Insets.bottom;
+        return layout.itemSize.height + _section1Insets.top + _section1Insets.bottom;
     } else {
-        return flowLayout.itemSize.height;
+        return layout.itemSize.height;
     }
 }
 
@@ -98,7 +101,7 @@
     if (section == 2) {
         return 5.0;
     }
-    return collectionViewLayout.minimumInteritemSpacing;
+    return 0.0;
 }
 
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
