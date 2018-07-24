@@ -16,4 +16,6 @@
 @property (nonatomic) CGSize footerReferenceSize;
 @property (nonatomic) UIEdgeInsets sectionInset;
 
+@property (nonatomic) BOOL showsHorizontalScrollIndicators;
+
 @end
