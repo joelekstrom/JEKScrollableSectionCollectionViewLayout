@@ -1,6 +1,6 @@
 //
 //  ViewController.m
-//  JEKScrollableSectionCollectionView
+//  JEKScrollableSectionCollectionViewLayout
 //
 //  Created by Joel Ekström on 2017-08-17.
 //  Copyright © 2017 Joel Ekström. All rights reserved.
@@ -25,7 +25,7 @@
     JEKScrollableSectionCollectionViewLayout *layout = (JEKScrollableSectionCollectionViewLayout *)self.collectionViewLayout;
     layout.itemSize = CGSizeMake(80.0, 80.0);
     layout.headerReferenceSize = CGSizeMake(100.0, 50.0);
-    self.section1Insets = UIEdgeInsetsMake(5.0, 100.0, 5.0, 20.0);
+    self.section1Insets = UIEdgeInsetsMake(20.0, 100.0, 20.0, 100.0);
     self.testData = [self generateTestData];
 }
 
@@ -68,24 +68,20 @@
     return cell;
 }
 
-- (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewFlowLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.section == 0) {
+        return CGSizeMake(80.0 + ((float)arc4random_uniform(20) - 10.0), 80.0 + ((float)arc4random_uniform(20) - 10.0));
+    }
+    return collectionViewLayout.itemSize;
+}
+
+- (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewFlowLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section
 {
     if (section == 1) {
         return self.section1Insets;
     }
-    return UIEdgeInsetsZero;
-}
-
-- (CGFloat)collectionView:(UICollectionView *)collectionView heightForSectionAtIndex:(NSInteger)section
-{
-    JEKScrollableSectionCollectionViewLayout *layout = (JEKScrollableSectionCollectionViewLayout *)collectionView.collectionViewLayout;
-    if (section == 0) {
-        return layout.itemSize.height * 3 + 10.0; // 10.0 is the line spacing, (5.0 * 2)
-    } else if (section == 1) {
-        return layout.itemSize.height + _section1Insets.top + _section1Insets.bottom;
-    } else {
-        return layout.itemSize.height;
-    }
+    return collectionViewLayout.sectionInset;
 }
 
 - (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewFlowLayout *)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section
@@ -101,7 +97,7 @@
     if (section == 2) {
         return 5.0;
     }
-    return 0.0;
+    return collectionViewLayout.minimumInteritemSpacing;
 }
 
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
@@ -110,7 +106,7 @@
     UILabel *label = view.subviews.firstObject;
 
     if (indexPath.section == 0) {
-        label.text = @"Section with multiple rows";
+        label.text = @"Section with multiple sizes";
     } else if (indexPath.section == 1) {
         label.text = @"Section with insets";
     } else if (indexPath.section == 2) {

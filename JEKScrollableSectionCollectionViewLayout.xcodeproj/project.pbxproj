@@ -7,47 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5D0344BE1F543DC00050DE76 /* libJEKScrollableSectionCollectionView.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5D0344B11F543D8E0050DE76 /* libJEKScrollableSectionCollectionView.a */; };
-		5D3B435C1F95F50E006B8B8E /* JEKScrollableSectionCollectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D3B435A1F95F50E006B8B8E /* JEKScrollableSectionCollectionView.m */; };
 		5D3B436A1F95F559006B8B8E /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D3B435F1F95F558006B8B8E /* AppDelegate.m */; };
 		5D3B436F1F95F559006B8B8E /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D3B43681F95F559006B8B8E /* ViewController.m */; };
 		5D3B43781F95F614006B8B8E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5D3B43711F95F614006B8B8E /* Assets.xcassets */; };
 		5D3B437B1F95F614006B8B8E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D3B43761F95F614006B8B8E /* main.m */; };
-		5D3B437F1F95F690006B8B8E /* JEKScrollableSectionCollectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D3B435A1F95F50E006B8B8E /* JEKScrollableSectionCollectionView.m */; };
 		5D3B43801F95F6B7006B8B8E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5D3B43721F95F614006B8B8E /* LaunchScreen.storyboard */; };
 		5D3B43811F95F6B7006B8B8E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5D3B43741F95F614006B8B8E /* Main.storyboard */; };
-		5D76E78B1F975409003E9DA6 /* JEKScrollableSectionCollectionView.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 5D3B435B1F95F50E006B8B8E /* JEKScrollableSectionCollectionView.h */; };
 		5D99484C1F988FCC008DF84C /* ExampleCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D99484B1F988FCC008DF84C /* ExampleCell.m */; };
 		5DB90F9621007BB2007A137D /* JEKScrollableSectionCollectionViewLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 5DB90F9521007BB2007A137D /* JEKScrollableSectionCollectionViewLayout.m */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		5D0344BC1F543DBA0050DE76 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 5D8FEDC61F463D0300857A7E /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 5D0344B01F543D8E0050DE76;
-			remoteInfo = JEKScrollableSectionCollectionView;
-		};
-/* End PBXContainerItemProxy section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		5D0344AF1F543D8E0050DE76 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "include/$(PRODUCT_NAME)";
-			dstSubfolderSpec = 16;
-			files = (
-				5D76E78B1F975409003E9DA6 /* JEKScrollableSectionCollectionView.h in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
-		5D0344B11F543D8E0050DE76 /* libJEKScrollableSectionCollectionView.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libJEKScrollableSectionCollectionView.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		5D3B435A1F95F50E006B8B8E /* JEKScrollableSectionCollectionView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JEKScrollableSectionCollectionView.m; sourceTree = "<group>"; };
-		5D3B435B1F95F50E006B8B8E /* JEKScrollableSectionCollectionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JEKScrollableSectionCollectionView.h; sourceTree = "<group>"; };
 		5D3B435E1F95F558006B8B8E /* ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ViewController.h; path = "Example Project/ViewController.h"; sourceTree = "<group>"; };
 		5D3B435F1F95F558006B8B8E /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = "Example Project/AppDelegate.m"; sourceTree = "<group>"; };
 		5D3B43621F95F558006B8B8E /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = "Example Project/AppDelegate.h"; sourceTree = "<group>"; };
@@ -65,18 +35,10 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		5D0344AE1F543D8E0050DE76 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		5D8FEDCB1F463D0300857A7E /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5D0344BE1F543DC00050DE76 /* libJEKScrollableSectionCollectionView.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -113,8 +75,6 @@
 		5D8FEDC51F463D0300857A7E = {
 			isa = PBXGroup;
 			children = (
-				5D3B435B1F95F50E006B8B8E /* JEKScrollableSectionCollectionView.h */,
-				5D3B435A1F95F50E006B8B8E /* JEKScrollableSectionCollectionView.m */,
 				5DB90F9421007BB2007A137D /* JEKScrollableSectionCollectionViewLayout.h */,
 				5DB90F9521007BB2007A137D /* JEKScrollableSectionCollectionViewLayout.m */,
 				5D0344AC1F543D2B0050DE76 /* Example Project */,
@@ -126,7 +86,6 @@
 			isa = PBXGroup;
 			children = (
 				5D8FEDCE1F463D0300857A7E /* Example Project.app */,
-				5D0344B11F543D8E0050DE76 /* libJEKScrollableSectionCollectionView.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -134,23 +93,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		5D0344B01F543D8E0050DE76 /* JEKScrollableSectionCollectionView */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 5D0344B71F543D8E0050DE76 /* Build configuration list for PBXNativeTarget "JEKScrollableSectionCollectionView" */;
-			buildPhases = (
-				5D0344AD1F543D8E0050DE76 /* Sources */,
-				5D0344AE1F543D8E0050DE76 /* Frameworks */,
-				5D0344AF1F543D8E0050DE76 /* CopyFiles */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = JEKScrollableSectionCollectionView;
-			productName = JEKScrollableSectionCollectionView;
-			productReference = 5D0344B11F543D8E0050DE76 /* libJEKScrollableSectionCollectionView.a */;
-			productType = "com.apple.product-type.library.static";
-		};
 		5D8FEDCD1F463D0300857A7E /* Example Project */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 5D8FEDE51F463D0300857A7E /* Build configuration list for PBXNativeTarget "Example Project" */;
@@ -162,7 +104,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				5D0344BD1F543DBA0050DE76 /* PBXTargetDependency */,
 			);
 			name = "Example Project";
 			productName = JEKScrollableSectionCollectionView;
@@ -175,14 +116,9 @@
 		5D8FEDC61F463D0300857A7E /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0900;
+				LastUpgradeCheck = 0940;
 				ORGANIZATIONNAME = "Joel Ekström";
 				TargetAttributes = {
-					5D0344B01F543D8E0050DE76 = {
-						CreatedOnToolsVersion = 8.3.3;
-						DevelopmentTeam = 5RNJHF933P;
-						ProvisioningStyle = Automatic;
-					};
 					5D8FEDCD1F463D0300857A7E = {
 						CreatedOnToolsVersion = 8.3.3;
 						DevelopmentTeam = 5RNJHF933P;
@@ -190,7 +126,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 5D8FEDC91F463D0300857A7E /* Build configuration list for PBXProject "JEKScrollableSectionCollectionView" */;
+			buildConfigurationList = 5D8FEDC91F463D0300857A7E /* Build configuration list for PBXProject "JEKScrollableSectionCollectionViewLayout" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -204,7 +140,6 @@
 			projectRoot = "";
 			targets = (
 				5D8FEDCD1F463D0300857A7E /* Example Project */,
-				5D0344B01F543D8E0050DE76 /* JEKScrollableSectionCollectionView */,
 			);
 		};
 /* End PBXProject section */
@@ -223,20 +158,11 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		5D0344AD1F543D8E0050DE76 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				5D3B437F1F95F690006B8B8E /* JEKScrollableSectionCollectionView.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		5D8FEDCA1F463D0300857A7E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				5D3B436F1F95F559006B8B8E /* ViewController.m in Sources */,
-				5D3B435C1F95F50E006B8B8E /* JEKScrollableSectionCollectionView.m in Sources */,
 				5D99484C1F988FCC008DF84C /* ExampleCell.m in Sources */,
 				5D3B437B1F95F614006B8B8E /* main.m in Sources */,
 				5DB90F9621007BB2007A137D /* JEKScrollableSectionCollectionViewLayout.m in Sources */,
@@ -245,14 +171,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		5D0344BD1F543DBA0050DE76 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 5D0344B01F543D8E0050DE76 /* JEKScrollableSectionCollectionView */;
-			targetProxy = 5D0344BC1F543DBA0050DE76 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		5D3B43721F95F614006B8B8E /* LaunchScreen.storyboard */ = {
@@ -269,31 +187,12 @@
 				5D3B43751F95F614006B8B8E /* Base */,
 			);
 			name = Main.storyboard;
+			path = "Example Project";
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		5D0344B81F543D8E0050DE76 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DEVELOPMENT_TEAM = 5RNJHF933P;
-				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-			};
-			name = Debug;
-		};
-		5D0344B91F543D8E0050DE76 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DEVELOPMENT_TEAM = 5RNJHF933P;
-				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-			};
-			name = Release;
-		};
 		5D8FEDE31F463D0300857A7E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -308,6 +207,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -315,6 +215,7 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -363,6 +264,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -370,6 +272,7 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -427,16 +330,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		5D0344B71F543D8E0050DE76 /* Build configuration list for PBXNativeTarget "JEKScrollableSectionCollectionView" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				5D0344B81F543D8E0050DE76 /* Debug */,
-				5D0344B91F543D8E0050DE76 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		5D8FEDC91F463D0300857A7E /* Build configuration list for PBXProject "JEKScrollableSectionCollectionView" */ = {
+		5D8FEDC91F463D0300857A7E /* Build configuration list for PBXProject "JEKScrollableSectionCollectionViewLayout" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				5D8FEDE31F463D0300857A7E /* Debug */,

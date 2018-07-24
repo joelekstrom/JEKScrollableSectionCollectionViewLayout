@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0900"
+   LastUpgradeVersion = "0940"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "5D8FEDCD1F463D0300857A7E"
-               BuildableName = "Example Project.app"
-               BlueprintName = "Example Project"
-               ReferencedContainer = "container:JEKScrollableSectionCollectionView.xcodeproj">
+               BlueprintIdentifier = "5D0344B01F543D8E0050DE76"
+               BuildableName = "libJEKScrollableSectionCollectionViewLayout.a"
+               BlueprintName = "JEKScrollableSectionCollectionViewLayout"
+               ReferencedContainer = "container:JEKScrollableSectionCollectionViewLayout.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -29,15 +29,6 @@
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
       </Testables>
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "5D8FEDCD1F463D0300857A7E"
-            BuildableName = "Example Project.app"
-            BlueprintName = "Example Project"
-            ReferencedContainer = "container:JEKScrollableSectionCollectionView.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
       <AdditionalOptions>
       </AdditionalOptions>
    </TestAction>
@@ -51,16 +42,15 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "5D8FEDCD1F463D0300857A7E"
-            BuildableName = "Example Project.app"
-            BlueprintName = "Example Project"
-            ReferencedContainer = "container:JEKScrollableSectionCollectionView.xcodeproj">
+            BlueprintIdentifier = "5D0344B01F543D8E0050DE76"
+            BuildableName = "libJEKScrollableSectionCollectionViewLayout.a"
+            BlueprintName = "JEKScrollableSectionCollectionViewLayout"
+            ReferencedContainer = "container:JEKScrollableSectionCollectionViewLayout.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </MacroExpansion>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
@@ -70,16 +60,15 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "5D8FEDCD1F463D0300857A7E"
-            BuildableName = "Example Project.app"
-            BlueprintName = "Example Project"
-            ReferencedContainer = "container:JEKScrollableSectionCollectionView.xcodeproj">
+            BlueprintIdentifier = "5D0344B01F543D8E0050DE76"
+            BuildableName = "libJEKScrollableSectionCollectionViewLayout.a"
+            BlueprintName = "JEKScrollableSectionCollectionViewLayout"
+            ReferencedContainer = "container:JEKScrollableSectionCollectionViewLayout.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">
