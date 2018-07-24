@@ -170,12 +170,12 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
         attributes.frame = CGRectMake(0.0, attributes.frame.origin.y, self.collectionView.frame.size.width, attributes.frame.size.height);
     }
 
-    for (NSIndexPath *indexPath in context.invalidatedDecorationIndexPaths[UICollectionElementKindSectionHeader]) {
+    for (NSIndexPath *indexPath in context.invalidatedSupplementaryIndexPaths[UICollectionElementKindSectionHeader]) {
         UICollectionViewLayoutAttributes *attributes = self.sections[indexPath.section].headerViewAttributes;
         attributes.frame = CGRectMake(0.0, attributes.frame.origin.y, self.collectionView.frame.size.width, attributes.frame.size.height);
     }
 
-    for (NSIndexPath *indexPath in context.invalidatedDecorationIndexPaths[UICollectionElementKindSectionFooter]) {
+    for (NSIndexPath *indexPath in context.invalidatedSupplementaryIndexPaths[UICollectionElementKindSectionFooter]) {
         UICollectionViewLayoutAttributes *attributes = self.sections[indexPath.section].footerViewAttributes;
         attributes.frame = CGRectMake(0.0, attributes.frame.origin.y, self.collectionView.frame.size.width, attributes.frame.size.height);
     }
