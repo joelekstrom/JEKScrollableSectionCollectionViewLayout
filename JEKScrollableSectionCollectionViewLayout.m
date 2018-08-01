@@ -129,7 +129,7 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
         sectionInfo.decorationViewAttributes.showsHorizontalScrollIndicator = self.showsHorizontalScrollIndicators;
 
         sectionInfo.footerViewAttributes = [self supplementaryViewAttributesOfKind:UICollectionElementKindSectionFooter atIndexPath:sectionIndexPath];
-        sectionInfo.footerViewAttributes.frame = CGRectOffset(sectionInfo.headerViewAttributes.frame, 0.0, yOffset);
+        sectionInfo.footerViewAttributes.frame = CGRectOffset(sectionInfo.footerViewAttributes.frame, 0.0, yOffset);
         yOffset += CGRectGetHeight(sectionInfo.footerViewAttributes.frame);
 
         [sectionInfo setOffset:self.offsetCache[@(section)].floatValue];
