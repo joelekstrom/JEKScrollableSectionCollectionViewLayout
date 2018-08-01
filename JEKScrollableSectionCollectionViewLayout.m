@@ -34,6 +34,8 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
 @property (nonatomic, assign) BOOL isAdjustingBoundsToInvalidateHorizontalSection;
 @property (nonatomic, strong) NSArray<JEKScrollableSectionInfo *> *sections;
 @property (nonatomic, strong) NSMutableDictionary<NSNumber *, NSNumber *> *offsetCache;
+@property (nonatomic, weak) id<UICollectionViewDataSource> dataSource;
+@property (nonatomic, weak) id<UICollectionViewDelegateFlowLayout> delegate;
 @end
 
 @interface JEKScrollableSectionDecorationView : UICollectionReusableView <UIGestureRecognizerDelegate>
@@ -81,12 +83,15 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
 {
     [super prepareLayout];
 
-    if (self.sections != nil) {
-        return;
+    if (self.sections == nil) {
+        [self layoutForCollectionViewWidth:self.collectionView.frame.size.width];
     }
+}
 
+- (void)layoutForCollectionViewWidth:(CGFloat)collectionViewWidth
+{
     NSMutableArray<JEKScrollableSectionInfo *> *sections = [NSMutableArray new];
-    NSInteger numberOfSections = [[self.collectionView dataSource] numberOfSectionsInCollectionView:self.collectionView];
+    NSInteger numberOfSections = [self.dataSource numberOfSectionsInCollectionView:self.collectionView];
     CGFloat yOffset = 0.0;
 
     for (NSInteger section = 0; section < numberOfSections; ++section) {
@@ -98,12 +103,12 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
         CGFloat interItemSpacing = [self interItemSpacingForSection:section];
         sectionFrame.size.width = sectionInsets.left;
 
-        sectionInfo.headerViewAttributes = [self supplementaryViewAttributesOfKind:UICollectionElementKindSectionHeader atIndexPath:sectionIndexPath];
+        sectionInfo.headerViewAttributes = [self supplementaryViewAttributesOfKind:UICollectionElementKindSectionHeader atIndexPath:sectionIndexPath width:collectionViewWidth];
         sectionInfo.headerViewAttributes.frame = CGRectOffset(sectionInfo.headerViewAttributes.frame, 0.0, yOffset);
         sectionFrame.origin.y += CGRectGetHeight(sectionInfo.headerViewAttributes.frame);
 
         NSMutableArray *items = [NSMutableArray new];
-        for (NSInteger item = 0; item < [self.collectionView.dataSource collectionView:self.collectionView numberOfItemsInSection:section]; ++item) {
+        for (NSInteger item = 0; item < [self.dataSource collectionView:self.collectionView numberOfItemsInSection:section]; ++item) {
             NSIndexPath *indexPath = [sectionIndexPath indexPathByAddingIndex:item];
             UICollectionViewLayoutAttributes *attributes = [UICollectionViewLayoutAttributes layoutAttributesForCellWithIndexPath:indexPath];
 
@@ -123,12 +128,12 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
         yOffset = CGRectGetMaxY(sectionFrame);
 
         sectionInfo.decorationViewAttributes = [JEKScrollableSectionDecorationViewLayoutAttributes layoutAttributesForDecorationViewOfKind:JEKScrollableCollectionViewLayoutScrollViewKind withIndexPath:sectionIndexPath];
-        sectionInfo.decorationViewAttributes.frame = CGRectMake(0, sectionFrame.origin.y, self.collectionView.frame.size.width, sectionFrame.size.height);
+        sectionInfo.decorationViewAttributes.frame = CGRectMake(0, sectionFrame.origin.y, collectionViewWidth, sectionFrame.size.height);
         sectionInfo.decorationViewAttributes.zIndex = 1;
         sectionInfo.decorationViewAttributes.sectionSize = sectionFrame.size;
         sectionInfo.decorationViewAttributes.showsHorizontalScrollIndicator = self.showsHorizontalScrollIndicators;
 
-        sectionInfo.footerViewAttributes = [self supplementaryViewAttributesOfKind:UICollectionElementKindSectionFooter atIndexPath:sectionIndexPath];
+        sectionInfo.footerViewAttributes = [self supplementaryViewAttributesOfKind:UICollectionElementKindSectionFooter atIndexPath:sectionIndexPath width:collectionViewWidth];
         sectionInfo.footerViewAttributes.frame = CGRectOffset(sectionInfo.footerViewAttributes.frame, 0.0, yOffset);
         yOffset += CGRectGetHeight(sectionInfo.footerViewAttributes.frame);
 
@@ -137,10 +142,10 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
     }
 
     self.sections = [sections copy];
-    self.contentSize = CGSizeMake(self.collectionView.frame.size.width, yOffset);
+    self.contentSize = CGSizeMake(collectionViewWidth, yOffset);
 }
 
-- (UICollectionViewLayoutAttributes *)supplementaryViewAttributesOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+- (UICollectionViewLayoutAttributes *)supplementaryViewAttributesOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath width:(CGFloat)collectionViewWidth
 {
     CGSize size = kind == UICollectionElementKindSectionHeader ? [self headerSizeForSection:indexPath.section] : [self footerSizeForSection:indexPath.section];
     if (CGSizeEqualToSize(size, CGSizeZero)) {
@@ -148,7 +153,7 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
     }
 
     UICollectionViewLayoutAttributes *attributes = [UICollectionViewLayoutAttributes layoutAttributesForSupplementaryViewOfKind:kind withIndexPath:indexPath];
-    attributes.frame = CGRectMake(0.0, 0.0, self.collectionView.frame.size.width, size.height);
+    attributes.frame = CGRectMake(0.0, 0.0, collectionViewWidth, size.height);
     return attributes;
 }
 
@@ -280,40 +285,44 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
 
 #pragma mark - Measurements
 
-- (id<UICollectionViewDelegateFlowLayout>)flowLayoutDelegate
-{
-    id delegate = self.collectionView.delegate;
-    return [delegate conformsToProtocol:@protocol(UICollectionViewDelegateFlowLayout)] ? delegate : nil;
-}
-
 - (CGFloat)interItemSpacingForSection:(NSUInteger)section
 {
-    id<UICollectionViewDelegateFlowLayout> delegate = [self flowLayoutDelegate];
-    return [delegate respondsToSelector:@selector(collectionView:layout:minimumInteritemSpacingForSectionAtIndex:)] ? [delegate collectionView:self.collectionView layout:self minimumInteritemSpacingForSectionAtIndex:section] : self.minimumInteritemSpacing;
+    return [self.delegate respondsToSelector:@selector(collectionView:layout:minimumInteritemSpacingForSectionAtIndex:)] ? [self.delegate collectionView:self.collectionView layout:self minimumInteritemSpacingForSectionAtIndex:section] : self.minimumInteritemSpacing;
 }
 
 - (UIEdgeInsets)sectionInsetsForSection:(NSUInteger)section
 {
-    id<UICollectionViewDelegateFlowLayout> delegate = [self flowLayoutDelegate];
-    return [delegate respondsToSelector:@selector(collectionView:layout:insetForSectionAtIndex:)] ? [delegate collectionView:self.collectionView layout:self insetForSectionAtIndex:section] : self.sectionInset;
+    return [self.delegate respondsToSelector:@selector(collectionView:layout:insetForSectionAtIndex:)] ? [self.delegate collectionView:self.collectionView layout:self insetForSectionAtIndex:section] : self.sectionInset;
 }
 
 - (CGSize)headerSizeForSection:(NSUInteger)section
 {
-    id<UICollectionViewDelegateFlowLayout> delegate = [self flowLayoutDelegate];
-    return [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForHeaderInSection:)] ? [delegate collectionView:self.collectionView layout:self referenceSizeForHeaderInSection:section] : self.headerReferenceSize;
+    return [self.delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForHeaderInSection:)] ? [self.delegate collectionView:self.collectionView layout:self referenceSizeForHeaderInSection:section] : self.headerReferenceSize;
 }
 
 - (CGSize)footerSizeForSection:(NSUInteger)section
 {
-    id<UICollectionViewDelegateFlowLayout> delegate = [self flowLayoutDelegate];
-    return [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForFooterInSection:)] ? [delegate collectionView:self.collectionView layout:self referenceSizeForFooterInSection:section] : self.footerReferenceSize;
+    return [self.delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForFooterInSection:)] ? [self.delegate collectionView:self.collectionView layout:self referenceSizeForFooterInSection:section] : self.footerReferenceSize;
 }
 
 - (CGSize)itemSizeForIndexPath:(NSIndexPath *)indexPath
 {
-    id<UICollectionViewDelegateFlowLayout> delegate = [self flowLayoutDelegate];
-    return [delegate respondsToSelector:@selector(collectionView:layout:sizeForItemAtIndexPath:)] ? [delegate collectionView:self.collectionView layout:self sizeForItemAtIndexPath:indexPath] : self.itemSize;
+    return [self.delegate respondsToSelector:@selector(collectionView:layout:sizeForItemAtIndexPath:)] ? [self.delegate collectionView:self.collectionView layout:self sizeForItemAtIndexPath:indexPath] : self.itemSize;
+}
+
+- (id<UICollectionViewDelegateFlowLayout>)delegate
+{
+    if (_delegate)
+        return _delegate;
+    id delegate = self.collectionView.delegate;
+    return [delegate conformsToProtocol:@protocol(UICollectionViewDelegateFlowLayout)] ? delegate : nil;
+}
+
+- (id<UICollectionViewDataSource>)dataSource
+{
+    if (_dataSource)
+        return _dataSource;
+    return self.collectionView.dataSource;
 }
 
 @end
