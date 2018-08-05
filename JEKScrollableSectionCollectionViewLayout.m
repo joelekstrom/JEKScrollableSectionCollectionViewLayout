@@ -17,12 +17,14 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
 @end
 
 @interface JEKScrollableSectionInfo : NSObject
-@property (nonatomic, strong) NSArray<UICollectionViewLayoutAttributes *> *itemAttributes;
 @property (nonatomic, strong) JEKScrollableSectionDecorationViewLayoutAttributes *decorationViewAttributes;
 @property (nonatomic, strong) UICollectionViewLayoutAttributes *headerViewAttributes;
 @property (nonatomic, strong) UICollectionViewLayoutAttributes *footerViewAttributes;
-@property (nonatomic, assign) CGFloat offset;
+@property (nonatomic, assign) CGFloat horizontalOffset;
+@property (nonatomic, strong) NSIndexPath *indexPath;
+@property (nonatomic, strong) NSArray<NSValue *> *itemFrames;
 - (NSArray<UICollectionViewLayoutAttributes *> *)layoutAttributesIntersectingRect:(CGRect)rect;
+- (UICollectionViewLayoutAttributes *)layoutAttributesForItemAtIndex:(NSUInteger)index;
 @end
 
 @interface JEKScrollableSectionLayoutInvalidationContext : UICollectionViewLayoutInvalidationContext
@@ -93,6 +95,7 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
     for (NSInteger section = 0; section < numberOfSections; ++section) {
         NSIndexPath *sectionIndexPath = [NSIndexPath indexPathWithIndex:section];
         JEKScrollableSectionInfo *sectionInfo = [JEKScrollableSectionInfo new];
+        sectionInfo.indexPath = [NSIndexPath indexPathWithIndex:section];
         CGRect sectionFrame = CGRectMake(0.0, yOffset, 0.0, 0.0);
 
         UIEdgeInsets sectionInsets = [self sectionInsetsForSection:section];
@@ -103,10 +106,9 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
         sectionInfo.headerViewAttributes.frame = CGRectOffset(sectionInfo.headerViewAttributes.frame, 0.0, yOffset);
         sectionFrame.origin.y += CGRectGetHeight(sectionInfo.headerViewAttributes.frame);
 
-        NSMutableArray *items = [NSMutableArray new];
+        NSMutableArray<NSValue *> *itemFrames = [NSMutableArray new];
         for (NSInteger item = 0; item < [self.collectionView numberOfItemsInSection:section]; ++item) {
             NSIndexPath *indexPath = [sectionIndexPath indexPathByAddingIndex:item];
-            UICollectionViewLayoutAttributes *attributes = [UICollectionViewLayoutAttributes layoutAttributesForCellWithIndexPath:indexPath];
 
             CGRect frame;
             frame.size = [self itemSizeForIndexPath:indexPath];
@@ -114,11 +116,10 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
             frame.origin.y = CGRectGetMinY(sectionFrame) + sectionInsets.top;
             sectionFrame.size.width += frame.size.width + (item == 0 ? 0.0 : interItemSpacing);
             sectionFrame.size.height = MAX(CGRectGetMaxY(frame) - sectionFrame.origin.y, sectionFrame.size.height);
-            attributes.frame = frame;
-            [items addObject:attributes];
+            [itemFrames addObject:[NSValue valueWithCGRect:frame]];
         }
 
-        sectionInfo.itemAttributes = [items copy];
+        sectionInfo.itemFrames = [itemFrames copy];
         sectionFrame.size.width += sectionInsets.right;
         sectionFrame.size.height += sectionInsets.bottom;
         yOffset = CGRectGetMaxY(sectionFrame);
@@ -133,7 +134,7 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
         sectionInfo.footerViewAttributes.frame = CGRectOffset(sectionInfo.footerViewAttributes.frame, 0.0, yOffset);
         yOffset += CGRectGetHeight(sectionInfo.footerViewAttributes.frame);
 
-        [sectionInfo setOffset:self.offsetCache[@(section)].floatValue];
+        [sectionInfo setHorizontalOffset:self.offsetCache[@(section)].floatValue];
         [sections addObject:sectionInfo];
     }
 
@@ -163,7 +164,7 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
     }
 
     if (context.invalidatedSection) {
-        context.invalidatedSection.offset = self.offsetCache[@([self.sections indexOfObject:context.invalidatedSection])].floatValue;
+        context.invalidatedSection.horizontalOffset = self.offsetCache[@([self.sections indexOfObject:context.invalidatedSection])].floatValue;
     }
 
     for (NSIndexPath *indexPath in context.invalidatedDecorationIndexPaths[JEKScrollableCollectionViewLayoutScrollViewKind]) {
@@ -191,7 +192,7 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
 
 - (UICollectionViewLayoutAttributes *)layoutAttributesForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    return self.sections[indexPath.section].itemAttributes[indexPath.row];
+    return [self.sections[indexPath.section] layoutAttributesForItemAtIndex:indexPath.item];
 }
 
 - (UICollectionViewLayoutAttributes *)layoutAttributesForSupplementaryViewOfKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
@@ -398,6 +399,13 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
 
 @implementation JEKScrollableSectionInfo
 
+- (UICollectionViewLayoutAttributes *)layoutAttributesForItemAtIndex:(NSUInteger)index
+{
+    UICollectionViewLayoutAttributes *attributes = [UICollectionViewLayoutAttributes layoutAttributesForCellWithIndexPath:[self.indexPath indexPathByAddingIndex:index]];
+    attributes.frame = CGRectOffset(self.itemFrames[index].CGRectValue, -_horizontalOffset, 0.0);
+    return attributes;
+}
+
 - (NSArray<UICollectionViewLayoutAttributes *> *)layoutAttributesIntersectingRect:(CGRect)rect
 {
     NSMutableArray *intersectingAttributes = [NSMutableArray new];
@@ -412,10 +420,11 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
     if (CGRectIntersectsRect(self.decorationViewAttributes.frame, rect)) {
         [intersectingAttributes addObject:self.decorationViewAttributes];
         BOOL visibleItemsFound = NO;
-        for (UICollectionViewLayoutAttributes *attributes in self.itemAttributes) {
-            if (CGRectIntersectsRect(attributes.frame, rect)) {
+        for (NSInteger i = 0; i < self.itemFrames.count; ++i) {
+            CGRect frame = CGRectOffset(self.itemFrames[i].CGRectValue, -_horizontalOffset, 0.0);
+            if (CGRectIntersectsRect(frame, rect)) {
                 visibleItemsFound = YES;
-                [intersectingAttributes addObject:attributes];
+                [intersectingAttributes addObject:[self layoutAttributesForItemAtIndex:i]];
             }
 
             // Optimization: If we have seen previously intersecting items but the current one
@@ -427,13 +436,9 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
     return intersectingAttributes;
 }
 
-- (void)setOffset:(CGFloat)offset
+- (void)setHorizontalOffset:(CGFloat)offset
 {
-    for (UICollectionViewLayoutAttributes *attributes in self.itemAttributes) {
-        CGRect originalFrame = CGRectOffset(attributes.frame, _offset, 0.0);
-        attributes.frame = CGRectOffset(originalFrame, -offset, 0.0);
-    }
-    _offset = offset;
+    _horizontalOffset = offset;
     self.decorationViewAttributes.sectionOffset = offset;
 }
 
