@@ -34,7 +34,6 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
 @property (nonatomic, assign) BOOL isAdjustingBoundsToInvalidateHorizontalSection;
 @property (nonatomic, strong) NSArray<JEKScrollableSectionInfo *> *sections;
 @property (nonatomic, strong) NSMutableDictionary<NSNumber *, NSNumber *> *offsetCache;
-@property (nonatomic, weak) id<UICollectionViewDataSource> dataSource;
 @property (nonatomic, weak) id<UICollectionViewDelegateFlowLayout> delegate;
 @end
 
@@ -83,15 +82,12 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
 {
     [super prepareLayout];
 
-    if (self.sections == nil) {
-        [self layoutForCollectionViewWidth:self.collectionView.frame.size.width];
+    if (self.sections != nil) {
+        return;
     }
-}
 
-- (void)layoutForCollectionViewWidth:(CGFloat)collectionViewWidth
-{
     NSMutableArray<JEKScrollableSectionInfo *> *sections = [NSMutableArray new];
-    NSInteger numberOfSections = [self.dataSource numberOfSectionsInCollectionView:self.collectionView];
+    NSInteger numberOfSections = [self.collectionView numberOfSections];
     CGFloat yOffset = 0.0;
 
     for (NSInteger section = 0; section < numberOfSections; ++section) {
@@ -103,12 +99,12 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
         CGFloat interItemSpacing = [self interItemSpacingForSection:section];
         sectionFrame.size.width = sectionInsets.left;
 
-        sectionInfo.headerViewAttributes = [self supplementaryViewAttributesOfKind:UICollectionElementKindSectionHeader atIndexPath:sectionIndexPath width:collectionViewWidth];
+        sectionInfo.headerViewAttributes = [self supplementaryViewAttributesOfKind:UICollectionElementKindSectionHeader atIndexPath:sectionIndexPath];
         sectionInfo.headerViewAttributes.frame = CGRectOffset(sectionInfo.headerViewAttributes.frame, 0.0, yOffset);
         sectionFrame.origin.y += CGRectGetHeight(sectionInfo.headerViewAttributes.frame);
 
         NSMutableArray *items = [NSMutableArray new];
-        for (NSInteger item = 0; item < [self.dataSource collectionView:self.collectionView numberOfItemsInSection:section]; ++item) {
+        for (NSInteger item = 0; item < [self.collectionView numberOfItemsInSection:section]; ++item) {
             NSIndexPath *indexPath = [sectionIndexPath indexPathByAddingIndex:item];
             UICollectionViewLayoutAttributes *attributes = [UICollectionViewLayoutAttributes layoutAttributesForCellWithIndexPath:indexPath];
 
@@ -128,12 +124,12 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
         yOffset = CGRectGetMaxY(sectionFrame);
 
         sectionInfo.decorationViewAttributes = [JEKScrollableSectionDecorationViewLayoutAttributes layoutAttributesForDecorationViewOfKind:JEKScrollableCollectionViewLayoutScrollViewKind withIndexPath:sectionIndexPath];
-        sectionInfo.decorationViewAttributes.frame = CGRectMake(0, sectionFrame.origin.y, collectionViewWidth, sectionFrame.size.height);
+        sectionInfo.decorationViewAttributes.frame = CGRectMake(0, sectionFrame.origin.y, self.collectionView.frame.size.width, sectionFrame.size.height);
         sectionInfo.decorationViewAttributes.zIndex = 1;
         sectionInfo.decorationViewAttributes.sectionSize = sectionFrame.size;
         sectionInfo.decorationViewAttributes.showsHorizontalScrollIndicator = self.showsHorizontalScrollIndicators;
 
-        sectionInfo.footerViewAttributes = [self supplementaryViewAttributesOfKind:UICollectionElementKindSectionFooter atIndexPath:sectionIndexPath width:collectionViewWidth];
+        sectionInfo.footerViewAttributes = [self supplementaryViewAttributesOfKind:UICollectionElementKindSectionFooter atIndexPath:sectionIndexPath];
         sectionInfo.footerViewAttributes.frame = CGRectOffset(sectionInfo.footerViewAttributes.frame, 0.0, yOffset);
         yOffset += CGRectGetHeight(sectionInfo.footerViewAttributes.frame);
 
@@ -142,10 +138,10 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
     }
 
     self.sections = [sections copy];
-    self.contentSize = CGSizeMake(collectionViewWidth, yOffset);
+    self.contentSize = CGSizeMake(self.collectionView.frame.size.width, yOffset);
 }
 
-- (UICollectionViewLayoutAttributes *)supplementaryViewAttributesOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath width:(CGFloat)collectionViewWidth
+- (UICollectionViewLayoutAttributes *)supplementaryViewAttributesOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
     CGSize size = kind == UICollectionElementKindSectionHeader ? [self headerSizeForSection:indexPath.section] : [self footerSizeForSection:indexPath.section];
     if (CGSizeEqualToSize(size, CGSizeZero)) {
@@ -153,7 +149,7 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
     }
 
     UICollectionViewLayoutAttributes *attributes = [UICollectionViewLayoutAttributes layoutAttributesForSupplementaryViewOfKind:kind withIndexPath:indexPath];
-    attributes.frame = CGRectMake(0.0, 0.0, collectionViewWidth, size.height);
+    attributes.frame = CGRectMake(0.0, 0.0, self.collectionView.frame.size.width, size.height);
     return attributes;
 }
 
@@ -312,17 +308,8 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
 
 - (id<UICollectionViewDelegateFlowLayout>)delegate
 {
-    if (_delegate)
-        return _delegate;
     id delegate = self.collectionView.delegate;
     return [delegate conformsToProtocol:@protocol(UICollectionViewDelegateFlowLayout)] ? delegate : nil;
-}
-
-- (id<UICollectionViewDataSource>)dataSource
-{
-    if (_dataSource)
-        return _dataSource;
-    return self.collectionView.dataSource;
 }
 
 @end

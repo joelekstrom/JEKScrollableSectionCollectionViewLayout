@@ -16,6 +16,7 @@
 		5D99484C1F988FCC008DF84C /* ExampleCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D99484B1F988FCC008DF84C /* ExampleCell.m */; };
 		5DB90F9621007BB2007A137D /* JEKScrollableSectionCollectionViewLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 5DB90F9521007BB2007A137D /* JEKScrollableSectionCollectionViewLayout.m */; };
 		5DB9F3BC21125AAB00FB286C /* Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5DB9F3BB21125AAB00FB286C /* Tests.m */; };
+		5DB9F3C421125ECC00FB286C /* JEKScrollableSectionCollectionViewLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 5DB90F9521007BB2007A137D /* JEKScrollableSectionCollectionViewLayout.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -178,7 +179,6 @@
 						CreatedOnToolsVersion = 9.4.1;
 						DevelopmentTeam = 5RNJHF933P;
 						ProvisioningStyle = Automatic;
-						TestTargetID = 5D8FEDCD1F463D0300857A7E;
 					};
 				};
 			};
@@ -238,6 +238,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5DB9F3C421125ECC00FB286C /* JEKScrollableSectionCollectionViewLayout.m in Sources */,
 				5DB9F3BC21125AAB00FB286C /* Tests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -410,7 +411,6 @@
 		5DB9F3C021125AAB00FB286C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
@@ -424,14 +424,12 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.footballaddicts.Tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Example Project.app/Example Project";
 			};
 			name = Debug;
 		};
 		5DB9F3C121125AAB00FB286C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
@@ -445,7 +443,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.footballaddicts.Tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Example Project.app/Example Project";
 			};
 			name = Release;
 		};
