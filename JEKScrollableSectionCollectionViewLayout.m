@@ -24,8 +24,10 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
 @property (nonatomic, strong) NSIndexPath *indexPath;
 @property (nonatomic, assign) CGFloat collectionViewWidth;
 @property (nonatomic, strong) NSMutableArray<NSValue *> *itemSizes;
+@property (nonatomic, assign) NSUInteger numberOfItems;
 @property (nonatomic, assign) CGSize headerSize;
 @property (nonatomic, assign) CGSize footerSize;
+@property (nonatomic, assign) BOOL needsLayout;
 - (void)prepareLayout;
 
 @property (nonatomic, readonly) CGRect frame; // Relative frame of the section in the collection view
@@ -97,38 +99,44 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
 {
     [super prepareLayout];
 
-    if (self.sections != nil) {
-        return;
-    }
+    if (self.sections == nil) {
+        NSMutableArray<JEKScrollableSectionInfo *> *sections = [NSMutableArray new];
+        NSInteger numberOfSections = [self.collectionView numberOfSections];
 
-    NSMutableArray<JEKScrollableSectionInfo *> *sections = [NSMutableArray new];
-    NSInteger numberOfSections = [self.collectionView numberOfSections];
-    CGFloat yOffset = 0.0;
-
-    for (NSInteger section = 0; section < numberOfSections; ++section) {
-        JEKScrollableSectionInfo *sectionInfo = [JEKScrollableSectionInfo new];
-        sectionInfo.indexPath = [NSIndexPath indexPathWithIndex:section];
-        sectionInfo.insets = [self sectionInsetsForSection:section];
-        sectionInfo.interItemSpacing = [self interItemSpacingForSection:section];
-        sectionInfo.headerSize = [self headerSizeForSection:section];
-        sectionInfo.footerSize = [self footerSizeForSection:section];
-        sectionInfo.collectionViewWidth = self.collectionView.frame.size.width;
-
-        NSMutableArray<NSValue *> *itemSizes = [NSMutableArray new];
-            for (NSInteger item = 0; item < [self.collectionView numberOfItemsInSection:section]; ++item) {
-            CGSize itemSize = [self itemSizeForIndexPath:[sectionInfo.indexPath indexPathByAddingIndex:item]];
-            [itemSizes addObject:[NSValue valueWithCGSize:itemSize]];
+        for (NSInteger section = 0; section < numberOfSections; ++section) {
+            JEKScrollableSectionInfo *sectionInfo = [JEKScrollableSectionInfo new];
+            sectionInfo.indexPath = [NSIndexPath indexPathWithIndex:section];
+            sectionInfo.collectionViewWidth = self.collectionView.frame.size.width;
+            sectionInfo.needsLayout = YES;
+            [sections addObject:sectionInfo];
         }
-
-        sectionInfo.itemSizes = itemSizes;
-        [sectionInfo prepareLayout];
-
-        sectionInfo.offset = CGPointMake(self.offsetCache[@(section)].floatValue, yOffset);
-        yOffset += CGRectGetHeight(sectionInfo.frame);
-        [sections addObject:sectionInfo];
+        self.sections = [sections copy];
     }
 
-    self.sections = [sections copy];
+    [self layoutSectionsIfNeeded];
+}
+
+- (void)layoutSectionsIfNeeded
+{
+    __block CGFloat yOffset = 0.0;
+    [self.sections enumerateObjectsUsingBlock:^(JEKScrollableSectionInfo *section, NSUInteger index, BOOL *stop) {
+        if (section.needsLayout) {
+            section.insets = [self sectionInsetsForSection:index];
+            section.interItemSpacing = [self interItemSpacingForSection:index];
+            section.headerSize = [self headerSizeForSection:index];
+            section.footerSize = [self footerSizeForSection:index];
+            section.numberOfItems = [self.collectionView numberOfItemsInSection:index];
+            NSMutableArray<NSValue *> *itemSizes = [NSMutableArray new];
+            for (NSInteger item = 0; item < section.numberOfItems; ++item) {
+                CGSize itemSize = [self itemSizeForIndexPath:[section.indexPath indexPathByAddingIndex:item]];
+                [itemSizes addObject:[NSValue valueWithCGSize:itemSize]];
+            }
+            section.itemSizes = itemSizes;
+            [section prepareLayout];
+            section.offset = CGPointMake(self.offsetCache[@(section.indexPath.section)].floatValue, yOffset);
+        }
+        yOffset += CGRectGetHeight(section.frame);
+    }];
     self.contentSize = CGSizeMake(self.collectionView.frame.size.width, yOffset);
 }
 
@@ -139,6 +147,12 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
     if (context.invalidateEverything) {
         self.sections = nil;
         return;
+    }
+
+    if (context.invalidateDataSourceCounts) {
+        for (JEKScrollableSectionInfo *section in self.sections) {
+            section.needsLayout = YES;
+        }
     }
 
     if (context.invalidatedSection) {
@@ -392,7 +406,7 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
     CGRect bounds = CGRectZero;
     bounds.size.width = self.insets.left;
     NSMutableArray<NSValue *> *itemFrames = [NSMutableArray new];
-    for (NSUInteger item = 0; item < self.itemSizes.count; ++item) {
+    for (NSUInteger item = 0; item < self.numberOfItems; ++item) {
         CGSize size = [self.itemSizes[item] CGSizeValue];
         CGRect frame;
         frame.size = size;
@@ -405,6 +419,7 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
     bounds.size.height += self.footerSize.height + self.insets.bottom;
     self.bounds = bounds;
     self.itemFrames = [itemFrames copy];
+    self.needsLayout = NO;
 }
 
 - (CGRect)frame
@@ -475,7 +490,7 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
     if (CGRectIntersectsRect(self.decorationViewAttributes.frame, rect)) {
         [intersectingAttributes addObject:self.decorationViewAttributes];
         BOOL visibleItemsFound = NO;
-        for (NSInteger i = 0; i < self.itemFrames.count; ++i) {
+        for (NSInteger i = 0; i < self.numberOfItems; ++i) {
             CGRect frame = CGRectOffset(self.itemFrames[i].CGRectValue, self.offset.x, self.offset.y);
             if (CGRectIntersectsRect(frame, rect)) {
                 visibleItemsFound = YES;
