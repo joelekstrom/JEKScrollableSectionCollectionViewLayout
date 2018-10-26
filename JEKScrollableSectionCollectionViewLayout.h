@@ -18,4 +18,12 @@
 
 @property (nonatomic) BOOL showsHorizontalScrollIndicators;
 
+/**
+ When YES, collectionView:viewForSupplementaryElementOfKind:atIndexPath:
+ will be queried with the kind JEKCollectionElementKindSectionBackground,
+ so you can optionally return a view to be used as a background for a section.
+ */
+@property (nonatomic) BOOL showsSectionBackgrounds;
+extern NSString * const JEKCollectionElementKindSectionBackground;
+
 @end

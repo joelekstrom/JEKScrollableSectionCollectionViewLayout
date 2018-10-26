@@ -27,6 +27,9 @@
     layout.headerReferenceSize = CGSizeMake(100.0, 50.0);
     self.section1Insets = UIEdgeInsetsMake(20.0, 100.0, 20.0, 100.0);
     self.testData = [self generateTestData];
+
+    layout.showsSectionBackgrounds = NO; // Set to YES to test background views
+    [self.collectionView registerClass:[UICollectionReusableView class] forSupplementaryViewOfKind:JEKCollectionElementKindSectionBackground withReuseIdentifier:@"backgroundView"];
 }
 
 - (NSArray *)generateTestData
@@ -102,19 +105,26 @@
 
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
-    UICollectionReusableView *view = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:@"header" forIndexPath:indexPath];
-    UILabel *label = view.subviews.firstObject;
+    if (kind == UICollectionElementKindSectionHeader) {
+        UICollectionReusableView *view = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:@"header" forIndexPath:indexPath];
+        UILabel *label = view.subviews.firstObject;
 
-    if (indexPath.section == 0) {
-        label.text = @"Section with multiple sizes";
-    } else if (indexPath.section == 1) {
-        label.text = @"Section with insets";
-    } else if (indexPath.section == 2) {
-        label.text = @"Section with interItemSpacing";
-    } else {
-        label.text = [NSString stringWithFormat:@"Section %ld", indexPath.section];
+        if (indexPath.section == 0) {
+            label.text = @"Section with multiple sizes";
+        } else if (indexPath.section == 1) {
+            label.text = @"Section with insets";
+        } else if (indexPath.section == 2) {
+            label.text = @"Section with interItemSpacing";
+        } else {
+            label.text = [NSString stringWithFormat:@"Section %ld", indexPath.section];
+        }
+        return view;
+    } else if (kind == JEKCollectionElementKindSectionBackground) {
+        UICollectionReusableView *view = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:@"backgroundView" forIndexPath:indexPath];
+        view.backgroundColor = indexPath.section % 2 == 0 ? [UIColor colorWithRed:41.0 / 255.0 green:70.0 / 255.0 blue:142.0 / 255.0 alpha:1.0] : [UIColor colorWithRed:29.0 / 255.0 green:96.00 / 255.0 blue:96.0 / 255.0 alpha:1.0];
+        return view;
     }
-    return view;
+    return nil;
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath

@@ -9,6 +9,7 @@
 #import "JEKScrollableSectionCollectionViewLayout.h"
 
 static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKScrollableCollectionViewLayoutScrollViewKind";
+NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElementKindSectionBackground";
 
 @class JEKScrollableSectionInfo;
 
@@ -36,6 +37,7 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
 @property (nonatomic, readonly) JEKScrollableSectionDecorationViewLayoutAttributes *decorationViewAttributes;
 @property (nonatomic, readonly) UICollectionViewLayoutAttributes *headerViewAttributes;
 @property (nonatomic, readonly) UICollectionViewLayoutAttributes *footerViewAttributes;
+@property (nonatomic, readonly) UICollectionViewLayoutAttributes *backgroundViewAttributes;
 
 - (NSArray<UICollectionViewLayoutAttributes *> *)layoutAttributesIntersectingRect:(CGRect)rect;
 - (UICollectionViewLayoutAttributes *)layoutAttributesForItemAtIndex:(NSUInteger)index;
@@ -177,7 +179,15 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
 - (UICollectionViewLayoutAttributes *)layoutAttributesForSupplementaryViewOfKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
 {
     JEKScrollableSectionInfo *section = self.sections[indexPath.section];
-    return elementKind == UICollectionElementKindSectionHeader ? section.headerViewAttributes : section.footerViewAttributes;
+    if (elementKind == UICollectionElementKindSectionHeader) {
+        return section.headerViewAttributes;
+    } else if (elementKind == UICollectionElementKindSectionFooter) {
+        return section.footerViewAttributes;
+    } else if (elementKind == JEKCollectionElementKindSectionBackground) {
+        return section.backgroundViewAttributes;
+    } else {
+        return nil;
+    }
 }
 
 - (UICollectionViewLayoutAttributes *)layoutAttributesForDecorationViewOfKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
@@ -199,6 +209,9 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
         if (intersectingAttributes.count > 0) {
             anyVisibleSectionFound = YES;
             [visibleAttributes addObjectsFromArray:intersectingAttributes];
+            if (self.showsSectionBackgrounds) {
+                [visibleAttributes addObject:section.backgroundViewAttributes];
+            }
         }
 
         // Optimization: If we have seen previously intersecting items but the current one
@@ -462,6 +475,17 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
     return attributes;
 }
 
+- (UICollectionViewLayoutAttributes *)backgroundViewAttributes
+{
+    UICollectionViewLayoutAttributes *attributes = [UICollectionViewLayoutAttributes layoutAttributesForSupplementaryViewOfKind:JEKCollectionElementKindSectionBackground withIndexPath:self.indexPath];
+    CGRect frame = [self frame];
+    frame.origin.x = 0.0;
+    frame.size.width = self.collectionViewWidth;
+    attributes.frame = frame;
+    attributes.zIndex = -99;
+    return attributes;
+}
+
 - (JEKScrollableSectionDecorationViewLayoutAttributes *)decorationViewAttributes
 {
     JEKScrollableSectionDecorationViewLayoutAttributes *attributes = [JEKScrollableSectionDecorationViewLayoutAttributes layoutAttributesForDecorationViewOfKind:JEKScrollableCollectionViewLayoutScrollViewKind withIndexPath:self.indexPath];
@@ -476,9 +500,20 @@ static NSString * const JEKScrollableCollectionViewLayoutScrollViewKind = @"JEKS
     return attributes;
 }
 
+/**
+ The attributes, if any, of this section that intersect rect.
+
+ NOTE: Does NOT include backgroundViewAttributes, since the section itself is not aware of
+ the `showsSectionBackgrounds` property.
+ */
 - (NSArray<UICollectionViewLayoutAttributes *> *)layoutAttributesIntersectingRect:(CGRect)rect
 {
+    if (!CGRectIntersectsRect(self.frame, rect)) {
+        return nil;
+    }
+
     NSMutableArray *intersectingAttributes = [NSMutableArray new];
+
     if (self.headerViewAttributes && CGRectIntersectsRect(self.headerViewAttributes.frame, rect)) {
         [intersectingAttributes addObject:self.headerViewAttributes];
     }
