@@ -225,17 +225,6 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
     return visibleAttributes;
 }
 
-- (void)scrollViewDidScroll:(UIScrollView *)scrollView
-{
-    NSUInteger section = scrollView.tag;
-    self.offsetCache[@(section)] = @(-scrollView.contentOffset.x);
-
-    JEKScrollableSectionLayoutInvalidationContext *invalidationContext = [JEKScrollableSectionLayoutInvalidationContext new];
-    invalidationContext.invalidatedSection = self.sections[section];
-    [self invalidateLayoutWithContext:invalidationContext];
-    [self adjustBoundsToInvalidateVisibleItemIndexPaths];
-}
-
 // NOTE: UICollectionView will only ever dequeue new cells if its bounds
 // change, regardless if all layout attributes are updated within invalidateLayoutWithContext.
 // Therefore a hack is required to make this layout work. After updating the frames in
@@ -272,6 +261,61 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
         }
     }
     return context;
+}
+
+#pragma mark - UIScrollViewDelegate
+#define DELEGATE_RESPONDS_TO_SELECTOR(SEL) ([self.collectionView.delegate conformsToProtocol:@protocol(JEKCollectionViewDelegateScrollableSectionLayout)] &&\
+                                            [self.collectionView.delegate respondsToSelector:SEL])
+#define DELEGATE (id<JEKCollectionViewDelegateScrollableSectionLayout>)self.collectionView.delegate
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+    NSUInteger section = scrollView.tag;
+    self.offsetCache[@(section)] = @(-scrollView.contentOffset.x);
+
+    JEKScrollableSectionLayoutInvalidationContext *invalidationContext = [JEKScrollableSectionLayoutInvalidationContext new];
+    invalidationContext.invalidatedSection = self.sections[section];
+    [self invalidateLayoutWithContext:invalidationContext];
+    [self adjustBoundsToInvalidateVisibleItemIndexPaths];
+
+    if (DELEGATE_RESPONDS_TO_SELECTOR(@selector(collectionView:layout:section:didScrollToOffset:))) {
+        [DELEGATE collectionView:self.collectionView layout:self section:section didScrollToOffset:scrollView.contentOffset.x];
+    }
+}
+
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
+{
+    if (DELEGATE_RESPONDS_TO_SELECTOR(@selector(collectionView:layout:sectionWillBeginDragging:))) {
+        [DELEGATE collectionView:self.collectionView layout:self sectionWillBeginDragging:scrollView.tag];
+    }
+}
+
+- (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset
+{
+    if (DELEGATE_RESPONDS_TO_SELECTOR(@selector(collectionView:layout:sectionWillEndDragging:withVelocity:targetOffset:))) {
+        [DELEGATE collectionView:self.collectionView layout:self sectionWillEndDragging:scrollView.tag withVelocity:velocity.x targetOffset:&targetContentOffset->x];
+    }
+}
+
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
+{
+    if (DELEGATE_RESPONDS_TO_SELECTOR(@selector(collectionView:layout:sectionDidEndDragging:willDecelerate:))) {
+        [DELEGATE collectionView:self.collectionView layout:self sectionDidEndDragging:scrollView.tag willDecelerate:decelerate];
+    }
+}
+
+- (void)scrollViewWillBeginDecelerating:(UIScrollView *)scrollView
+{
+    if (DELEGATE_RESPONDS_TO_SELECTOR(@selector(collectionView:layout:sectionWillBeginDecelerating:))) {
+        [DELEGATE collectionView:self.collectionView layout:self sectionWillBeginDecelerating:scrollView.tag];
+    }
+}
+
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
+{
+    if (DELEGATE_RESPONDS_TO_SELECTOR(@selector(collectionView:layout:sectionDidEndDecelerating:))) {
+        [DELEGATE collectionView:self.collectionView layout:self sectionDidEndDecelerating:scrollView.tag];
+    }
 }
 
 #pragma mark - Measurements
