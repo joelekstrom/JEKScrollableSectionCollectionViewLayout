@@ -17,6 +17,7 @@ and you have to set the measurements in code. Check the example project for a fu
 - (almost) drop in replacement for `UICollectionViewFlowLayout`
 - A simple layout object - doesn't need to subclass or modify `UICollectionView` in any way
   - ... leading to efficient reuse of cells and support for prefetching
+- Section background views (as optional supplementary views)
 
 ## Installation
 - CocoaPods: `pod 'JEKScrollableSectionCollectionViewLayout'`
@@ -25,3 +26,27 @@ and you have to set the measurements in code. Check the example project for a fu
 ## Planned features
 - Support for `sectionHeadersPinToVisibleBounds`
 - Support for multiple rows in single section
+
+## Section backgrounds
+The layout has support for showing background views behind each seaction.
+To enable it, you have to set `layout.showsSectionBackgrounds = YES` when setting
+up your layout object.
+
+Then, `collectionView:viewForSupplementaryElementOfKind:atIndexPath:` will be called
+in your data source with the `JEKCollectionElementKindSectionBackground` kind. Dequeue
+and return a view like you would normally with section headers and footers.
+
+## Observing section scrolling
+The `JEKCollectionViewDelegateScrollableSectionLayout`-protocol allows you to observe
+and manipulate scrolling per horizontal section. To use it, simply conform to this protocol
+instead of `UICollectionViewDelegateFlowLayout` (which is then implicitly conformed).
+
+The protocol closely resembles `UIScrollViewDelegate` and exposes the following optional methods:
+```objc
+- (void)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout *)layout section:(NSUInteger)section didScrollToOffset:(CGFloat)horizontalOffset;
+- (void)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout *)layout sectionWillBeginDragging:(NSUInteger)section;
+- (void)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout *)layout sectionWillEndDragging:(NSUInteger)section withVelocity:(CGFloat)velocity targetOffset:(inout CGFloat *)targetHorizontalOffset;
+- (void)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout *)layout sectionDidEndDragging:(NSUInteger)section willDecelerate:(BOOL)decelerate;
+- (void)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout *)layout sectionWillBeginDecelerating:(NSUInteger)section;
+- (void)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout *)layout sectionDidEndDecelerating:(NSUInteger)section;
+```
