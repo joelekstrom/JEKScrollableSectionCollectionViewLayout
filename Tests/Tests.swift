@@ -75,6 +75,31 @@ class Tests : XCTestCase {
         XCTAssertEqual(footerAttributes?.frame, expectedFrame)
         XCTAssertEqual(layout.collectionViewContentSize.height, measurements.sectionInsets.top + measurements.itemSize.height + measurements.sectionInsets.bottom + measurements.footerSize.height);
     }
+
+    func testBackgroundViewLayout() {
+        layout.showsSectionBackgrounds = true;
+        layout.prepare()
+        let backgroundViewAttributes = layout.layoutAttributesForSupplementaryView(ofKind: JEKCollectionElementKindSectionBackground, at: IndexPath(index: 0))
+        XCTAssertEqual(backgroundViewAttributes?.representedElementKind, JEKCollectionElementKindSectionBackground)
+        let expectedFrame = CGRect(x: 0, y: 0, width: collectionView.frame.size.width, height: measurements.itemSize.height)
+        XCTAssertEqual(backgroundViewAttributes?.frame, expectedFrame)
+    }
+
+    func testThatBackgroundViewsExtendBehindHeadersAndFooters() {
+        layout.showsSectionBackgrounds = true;
+        measurements.headerSize = CGSize(width: 10, height: 25)
+        measurements.footerSize = CGSize(width: 10, height: 25)
+        layout.prepare()
+
+        let backgroundViewAttributes = layout.layoutAttributesForSupplementaryView(ofKind: JEKCollectionElementKindSectionBackground, at: IndexPath(index: 0))
+        let expectedFrame = CGRect(x: 0, y: 0, width: collectionView.frame.size.width, height: measurements.itemSize.height + measurements.headerSize.height + measurements.footerSize.height)
+        XCTAssertEqual(backgroundViewAttributes?.frame, expectedFrame)
+
+        let headerViewAttributes = layout.layoutAttributesForSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, at: IndexPath(index: 0))
+        let footerViewAttributes = layout.layoutAttributesForSupplementaryView(ofKind: UICollectionView.elementKindSectionFooter, at: IndexPath(index: 0))
+        XCTAssertTrue(backgroundViewAttributes!.zIndex < headerViewAttributes!.zIndex)
+        XCTAssertTrue(backgroundViewAttributes!.zIndex < footerViewAttributes!.zIndex)
+    }
 }
 
 extension LayoutMeasurements {
