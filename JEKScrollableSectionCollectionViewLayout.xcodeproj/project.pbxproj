@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5D256B1E219A0A510054A84A /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D256B1D219A0A510054A84A /* Tests.swift */; };
 		5D3B436A1F95F559006B8B8E /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D3B435F1F95F558006B8B8E /* AppDelegate.m */; };
 		5D3B436F1F95F559006B8B8E /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D3B43681F95F559006B8B8E /* ViewController.m */; };
 		5D3B43781F95F614006B8B8E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5D3B43711F95F614006B8B8E /* Assets.xcassets */; };
@@ -15,7 +16,6 @@
 		5D3B43811F95F6B7006B8B8E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5D3B43741F95F614006B8B8E /* Main.storyboard */; };
 		5D99484C1F988FCC008DF84C /* ExampleCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D99484B1F988FCC008DF84C /* ExampleCell.m */; };
 		5DB90F9621007BB2007A137D /* JEKScrollableSectionCollectionViewLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 5DB90F9521007BB2007A137D /* JEKScrollableSectionCollectionViewLayout.m */; };
-		5DB9F3BC21125AAB00FB286C /* Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5DB9F3BB21125AAB00FB286C /* Tests.m */; };
 		5DB9F3C421125ECC00FB286C /* JEKScrollableSectionCollectionViewLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 5DB90F9521007BB2007A137D /* JEKScrollableSectionCollectionViewLayout.m */; };
 /* End PBXBuildFile section */
 
@@ -30,6 +30,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		5D256B1C219A0A510054A84A /* Tests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Tests-Bridging-Header.h"; sourceTree = "<group>"; };
+		5D256B1D219A0A510054A84A /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
 		5D3B435E1F95F558006B8B8E /* ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ViewController.h; path = "Example Project/ViewController.h"; sourceTree = "<group>"; };
 		5D3B435F1F95F558006B8B8E /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = "Example Project/AppDelegate.m"; sourceTree = "<group>"; };
 		5D3B43621F95F558006B8B8E /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = "Example Project/AppDelegate.h"; sourceTree = "<group>"; };
@@ -45,7 +47,6 @@
 		5DB90F9421007BB2007A137D /* JEKScrollableSectionCollectionViewLayout.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JEKScrollableSectionCollectionViewLayout.h; sourceTree = "<group>"; };
 		5DB90F9521007BB2007A137D /* JEKScrollableSectionCollectionViewLayout.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JEKScrollableSectionCollectionViewLayout.m; sourceTree = "<group>"; };
 		5DB9F3B921125AAA00FB286C /* Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		5DB9F3BB21125AAB00FB286C /* Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Tests.m; sourceTree = "<group>"; };
 		5DB9F3BD21125AAB00FB286C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -117,8 +118,9 @@
 		5DB9F3BA21125AAB00FB286C /* Tests */ = {
 			isa = PBXGroup;
 			children = (
-				5DB9F3BB21125AAB00FB286C /* Tests.m */,
 				5DB9F3BD21125AAB00FB286C /* Info.plist */,
+				5D256B1D219A0A510054A84A /* Tests.swift */,
+				5D256B1C219A0A510054A84A /* Tests-Bridging-Header.h */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -167,7 +169,7 @@
 		5D8FEDC61F463D0300857A7E /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0940;
+				LastUpgradeCheck = 1010;
 				ORGANIZATIONNAME = "Joel Ekström";
 				TargetAttributes = {
 					5D8FEDCD1F463D0300857A7E = {
@@ -178,6 +180,7 @@
 					5DB9F3B821125AAA00FB286C = {
 						CreatedOnToolsVersion = 9.4.1;
 						DevelopmentTeam = 5RNJHF933P;
+						LastSwiftMigration = 1010;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -239,7 +242,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5DB9F3C421125ECC00FB286C /* JEKScrollableSectionCollectionViewLayout.m in Sources */,
-				5DB9F3BC21125AAB00FB286C /* Tests.m in Sources */,
+				5D256B1E219A0A510054A84A /* Tests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -377,6 +380,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
@@ -412,6 +416,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -423,6 +428,9 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.footballaddicts.Tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "Tests/Tests-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -431,6 +439,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -442,6 +451,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.footballaddicts.Tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "Tests/Tests-Bridging-Header.h";
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
