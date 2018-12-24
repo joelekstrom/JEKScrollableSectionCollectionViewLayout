@@ -462,6 +462,7 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
 {
     CGRect bounds = CGRectZero;
     bounds.size.width = self.insets.left;
+    bounds.size.height = self.headerSize.height;
     NSMutableArray<NSValue *> *itemFrames = [NSMutableArray new];
     for (NSUInteger item = 0; item < self.numberOfItems; ++item) {
         CGSize size = [self.itemSizes[item] CGSizeValue];

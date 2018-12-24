@@ -1,7 +1,7 @@
 # coding: utf-8
 Pod::Spec.new do |spec|
   spec.name         = 'JEKScrollableSectionCollectionViewLayout'
-  spec.version      = '1.1.0'
+  spec.version      = '1.1.1'
   spec.platform     = :ios, '9.1'
   spec.homepage     = 'https://github.com/accatyyc/JEKScrollableSectionCollectionViewLayout'
   spec.authors      = { 'Joel Ekström' => 'accatyyc@gmail.com' }
