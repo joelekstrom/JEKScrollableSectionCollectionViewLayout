@@ -50,3 +50,46 @@ The protocol closely resembles `UIScrollViewDelegate` and exposes the following 
 - (void)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout *)layout sectionWillBeginDecelerating:(NSUInteger)section;
 - (void)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout *)layout sectionDidEndDecelerating:(NSUInteger)section;
 ```
+
+## Usage example
+Since this is a drop-in replacement for `UICollectionViewFlowLayout`, normally
+you can just change the layout object in your current flow-layout based collection views.
+
+Here's an example of a bare minimum `UICollectionViewController` with two horizontal sections.
+
+```swift
+class MyViewController: UICollectionViewController {
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        let layout = JEKScrollableSectionCollectionViewLayout()
+        layout.itemSize = CGSize(width: 50, height: 50);
+        layout.headerReferenceSize = CGSize(width: 0, height: 22)
+        layout.minimumInteritemSpacing = 5
+        collectionView.collectionViewLayout = layout
+
+        collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
+        collectionView.register(UICollectionReusableView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "header")
+    }
+
+    override func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 2
+    }
+
+    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return 10
+    }
+
+    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
+        cell.backgroundColor = UIColor.gray
+        return cell
+    }
+
+    override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "header", for: indexPath)
+        header.backgroundColor = UIColor.blue
+        return header
+    }
+}
+```
