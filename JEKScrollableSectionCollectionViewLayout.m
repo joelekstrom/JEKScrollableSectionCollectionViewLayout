@@ -15,10 +15,10 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
 
 @interface JEKScrollableSectionDecorationViewLayoutAttributes : UICollectionViewLayoutAttributes
 @property (nonatomic, strong) JEKScrollableSectionInfo *section;
-@property (nonatomic, assign) BOOL showsHorizontalScrollIndicator;
 @end
 
 @interface JEKScrollableSectionInfo : NSObject
+@property (nonatomic, weak) JEKScrollableSectionCollectionViewLayout *layout;
 @property (nonatomic, assign) CGPoint offset;
 @property (nonatomic, assign) CGFloat interItemSpacing;
 @property (nonatomic, assign) UIEdgeInsets insets;
@@ -84,7 +84,12 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
 {
     [self registerClass:JEKScrollableSectionDecorationView.class forDecorationViewOfKind:JEKScrollableCollectionViewLayoutScrollViewKind];
     self.offsetCache = [NSMutableDictionary new];
-    self.showsHorizontalScrollIndicators = YES;
+    self.defaultScrollViewConfiguration = [JEKScrollViewConfiguration new];
+}
+
+- (void)setShowsHorizontalScrollIndicators:(BOOL)showsHorizontalScrollIndicators
+{
+    self.defaultScrollViewConfiguration.showsHorizontalScrollIndicator = showsHorizontalScrollIndicators;
 }
 
 + (Class)invalidationContextClass
@@ -107,6 +112,7 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
 
         for (NSInteger section = 0; section < numberOfSections; ++section) {
             JEKScrollableSectionInfo *sectionInfo = [JEKScrollableSectionInfo new];
+            sectionInfo.layout = self;
             sectionInfo.indexPath = [NSIndexPath indexPathWithIndex:section];
             sectionInfo.collectionViewWidth = self.collectionView.frame.size.width;
             sectionInfo.needsLayout = YES;
@@ -193,9 +199,7 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
 - (UICollectionViewLayoutAttributes *)layoutAttributesForDecorationViewOfKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
 {
     if (elementKind == JEKScrollableCollectionViewLayoutScrollViewKind) {
-        JEKScrollableSectionDecorationViewLayoutAttributes *attributes = self.sections[indexPath.section].decorationViewAttributes;
-        attributes.showsHorizontalScrollIndicator = self.showsHorizontalScrollIndicators;
-        return attributes;
+        return self.sections[indexPath.section].decorationViewAttributes;
     }
     return nil;
 }
@@ -345,6 +349,15 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
     return [self.delegate respondsToSelector:@selector(collectionView:layout:sizeForItemAtIndexPath:)] ? [self.delegate collectionView:self.collectionView layout:self sizeForItemAtIndexPath:indexPath] : self.itemSize;
 }
 
+- (JEKScrollViewConfiguration *)scrollViewConfigurationForSection:(NSUInteger)section
+{
+    JEKScrollViewConfiguration *configuration = self.defaultScrollViewConfiguration;
+    if (DELEGATE_RESPONDS_TO_SELECTOR(@selector(collectionView:layout:scrollViewConfigurationForSection:))) {
+        configuration = [DELEGATE collectionView:self.collectionView layout:self scrollViewConfigurationForSection:section] ?: configuration;
+    }
+    return configuration;
+}
+
 - (id<UICollectionViewDelegateFlowLayout>)delegate
 {
     id delegate = self.collectionView.delegate;
@@ -392,8 +405,20 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
     [super applyLayoutAttributes:layoutAttributes];
     self.section = layoutAttributes.section;
     self.scrollView.tag = layoutAttributes.indexPath.section;
-    self.scrollView.showsHorizontalScrollIndicator = layoutAttributes.showsHorizontalScrollIndicator;
+    [self applyScrollViewConfiguration:[self.section.layout scrollViewConfigurationForSection:layoutAttributes.indexPath.section]];
     [self.scrollView setContentOffset:CGPointMake(-layoutAttributes.section.offset.x, 0.0) animated:NO];
+}
+
+- (void)applyScrollViewConfiguration:(JEKScrollViewConfiguration *)configuration
+{
+    self.scrollView.bounces = configuration.bounces;
+    self.scrollView.alwaysBounceHorizontal = configuration.alwaysBounceHorizontal;
+    self.scrollView.showsHorizontalScrollIndicator = configuration.showsHorizontalScrollIndicator;
+    self.scrollView.scrollIndicatorInsets = configuration.scrollIndicatorInsets;
+    self.scrollView.indicatorStyle = configuration.indicatorStyle;
+    self.scrollView.decelerationRate = configuration.decelerationRate;
+    self.scrollView.pagingEnabled = configuration.isPagingEnabled;
+    self.scrollView.scrollEnabled = configuration.isScrollEnabled;
 }
 
 - (void)didMoveToSuperview
@@ -445,7 +470,6 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
 {
     JEKScrollableSectionDecorationViewLayoutAttributes *copy = [super copyWithZone:zone];
     copy.section = self.section;
-    copy.showsHorizontalScrollIndicator = self.showsHorizontalScrollIndicator;
     return copy;
 }
 
@@ -559,16 +583,19 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
 
     NSMutableArray *intersectingAttributes = [NSMutableArray new];
 
-    if (self.headerViewAttributes && CGRectIntersectsRect(self.headerViewAttributes.frame, rect)) {
-        [intersectingAttributes addObject:self.headerViewAttributes];
+    UICollectionViewLayoutAttributes *headerViewAttributes = self.headerViewAttributes;
+    if (headerViewAttributes && CGRectIntersectsRect(headerViewAttributes.frame, rect)) {
+        [intersectingAttributes addObject:headerViewAttributes];
     }
 
-    if (self.footerViewAttributes && CGRectIntersectsRect(self.footerViewAttributes.frame, rect)) {
-        [intersectingAttributes addObject:self.footerViewAttributes];
+    UICollectionViewLayoutAttributes *footerViewAttributes = self.footerViewAttributes;
+    if (footerViewAttributes && CGRectIntersectsRect(footerViewAttributes.frame, rect)) {
+        [intersectingAttributes addObject:footerViewAttributes];
     }
 
-    if (CGRectIntersectsRect(self.decorationViewAttributes.frame, rect)) {
-        [intersectingAttributes addObject:self.decorationViewAttributes];
+    JEKScrollableSectionDecorationViewLayoutAttributes *scrollViewAttributes = self.decorationViewAttributes;
+    if (CGRectIntersectsRect(scrollViewAttributes.frame, rect)) {
+        [intersectingAttributes addObject:scrollViewAttributes];
         BOOL visibleItemsFound = NO;
         for (NSInteger i = 0; i < self.numberOfItems; ++i) {
             CGRect frame = CGRectOffset(self.itemFrames[i].CGRectValue, self.offset.x, self.offset.y);
@@ -584,6 +611,30 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
         }
     }
     return intersectingAttributes;
+}
+
+@end
+
+@implementation JEKScrollViewConfiguration
+
++ (instancetype)defaultConfiguration
+{
+    return [[self alloc] init];
+}
+
+- (instancetype)init
+{
+    if (self = [super init]) {
+        self.bounces = YES;
+        self.alwaysBounceHorizontal = YES;
+        self.showsHorizontalScrollIndicator = YES;
+        self.scrollIndicatorInsets = UIEdgeInsetsZero;
+        self.indicatorStyle = UIScrollViewIndicatorStyleDefault;
+        self.decelerationRate = UIScrollViewDecelerationRateNormal;
+        self.pagingEnabled = NO;
+        self.scrollEnabled = YES;
+    }
+    return self;
 }
 
 @end
