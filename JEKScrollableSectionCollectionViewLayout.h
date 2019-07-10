@@ -6,6 +6,8 @@
 //  Copyright © 2018 Joel Ekström. All rights reserved.
 //
 
+NS_ASSUME_NONNULL_BEGIN
+
 #import <UIKit/UIKit.h>
 
 @class JEKScrollViewConfiguration;
@@ -67,3 +69,6 @@ extern NSString * const JEKCollectionElementKindSectionBackground;
 - (void)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout *)layout sectionWillBeginDecelerating:(NSUInteger)section;
 - (void)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout *)layout sectionDidEndDecelerating:(NSUInteger)section;
 @end
+
+NS_ASSUME_NONNULL_END
+ 
