@@ -6,9 +6,10 @@
 //  Copyright © 2018 Joel Ekström. All rights reserved.
 //
 
-NS_ASSUME_NONNULL_BEGIN
 
 #import <UIKit/UIKit.h>
+
+NS_ASSUME_NONNULL_BEGIN
 
 @class JEKScrollViewConfiguration;
 @interface JEKScrollableSectionCollectionViewLayout : UICollectionViewLayout
