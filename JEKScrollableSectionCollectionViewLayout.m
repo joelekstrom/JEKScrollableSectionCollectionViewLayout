@@ -22,7 +22,7 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
 @property (nonatomic, assign) CGPoint offset;
 @property (nonatomic, assign) CGFloat interItemSpacing;
 @property (nonatomic, assign) UIEdgeInsets insets;
-@property (nonatomic, strong) NSIndexPath *indexPath;
+@property (nonatomic, assign) NSUInteger index;
 @property (nonatomic, assign) CGFloat collectionViewWidth;
 @property (nonatomic, strong) NSMutableArray<NSValue *> *itemSizes;
 @property (nonatomic, assign) NSUInteger numberOfItems;
@@ -113,7 +113,7 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
         for (NSInteger section = 0; section < numberOfSections; ++section) {
             JEKScrollableSectionInfo *sectionInfo = [JEKScrollableSectionInfo new];
             sectionInfo.layout = self;
-            sectionInfo.indexPath = [NSIndexPath indexPathWithIndex:section];
+            sectionInfo.index = section;
             sectionInfo.collectionViewWidth = self.collectionView.frame.size.width;
             sectionInfo.needsLayout = YES;
             [sections addObject:sectionInfo];
@@ -136,12 +136,12 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
             section.numberOfItems = [self.collectionView numberOfItemsInSection:index];
             NSMutableArray<NSValue *> *itemSizes = [NSMutableArray new];
             for (NSInteger item = 0; item < section.numberOfItems; ++item) {
-                CGSize itemSize = [self itemSizeForIndexPath:[section.indexPath indexPathByAddingIndex:item]];
+                CGSize itemSize = [self itemSizeForIndexPath:[NSIndexPath indexPathForItem:item inSection:section.index]];
                 [itemSizes addObject:[NSValue valueWithCGSize:itemSize]];
             }
             section.itemSizes = itemSizes;
             [section prepareLayout];
-            section.offset = CGPointMake(self.offsetCache[@(section.indexPath.section)].floatValue, yOffset);
+            section.offset = CGPointMake(self.offsetCache[@(section.index)].floatValue, yOffset);
         }
         yOffset += CGRectGetHeight(section.frame);
     }];
@@ -516,7 +516,7 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
 
 - (UICollectionViewLayoutAttributes *)layoutAttributesForItemAtIndex:(NSUInteger)index
 {
-    UICollectionViewLayoutAttributes *attributes = [UICollectionViewLayoutAttributes layoutAttributesForCellWithIndexPath:[self.indexPath indexPathByAddingIndex:index]];
+    UICollectionViewLayoutAttributes *attributes = [UICollectionViewLayoutAttributes layoutAttributesForCellWithIndexPath:[NSIndexPath indexPathForItem:index inSection:self.index]];
     attributes.frame = CGRectOffset(self.itemFrames[index].CGRectValue, self.offset.x, self.offset.y);
     return attributes;
 }
@@ -527,7 +527,7 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
         return nil;
     }
 
-    UICollectionViewLayoutAttributes *attributes = [UICollectionViewLayoutAttributes layoutAttributesForSupplementaryViewOfKind:UICollectionElementKindSectionHeader withIndexPath:self.indexPath];
+    UICollectionViewLayoutAttributes *attributes = [UICollectionViewLayoutAttributes layoutAttributesForSupplementaryViewOfKind:UICollectionElementKindSectionHeader withIndexPath:[NSIndexPath indexPathForItem:0 inSection:self.index]];
     attributes.frame = CGRectMake(0.0, self.offset.y, self.collectionViewWidth, self.headerSize.height);
     return attributes;
 }
@@ -538,7 +538,7 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
         return nil;
     }
 
-    UICollectionViewLayoutAttributes *attributes = [UICollectionViewLayoutAttributes layoutAttributesForSupplementaryViewOfKind:UICollectionElementKindSectionFooter withIndexPath:self.indexPath];
+    UICollectionViewLayoutAttributes *attributes = [UICollectionViewLayoutAttributes layoutAttributesForSupplementaryViewOfKind:UICollectionElementKindSectionFooter withIndexPath:[NSIndexPath indexPathForItem:0 inSection:self.index]];
     CGRect sectionFrame = self.frame;
     attributes.frame = CGRectMake(0.0, CGRectGetMaxY(sectionFrame) - self.footerSize.height, self.collectionViewWidth, self.footerSize.height);
     return attributes;
@@ -546,7 +546,7 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
 
 - (UICollectionViewLayoutAttributes *)backgroundViewAttributes
 {
-    UICollectionViewLayoutAttributes *attributes = [UICollectionViewLayoutAttributes layoutAttributesForSupplementaryViewOfKind:JEKCollectionElementKindSectionBackground withIndexPath:self.indexPath];
+    UICollectionViewLayoutAttributes *attributes = [UICollectionViewLayoutAttributes layoutAttributesForSupplementaryViewOfKind:JEKCollectionElementKindSectionBackground withIndexPath:[NSIndexPath indexPathForItem:0 inSection:self.index]];
     CGRect frame = [self frame];
     frame.origin.x = 0.0;
     frame.size.width = self.collectionViewWidth;
@@ -557,7 +557,7 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
 
 - (JEKScrollableSectionDecorationViewLayoutAttributes *)decorationViewAttributes
 {
-    JEKScrollableSectionDecorationViewLayoutAttributes *attributes = [JEKScrollableSectionDecorationViewLayoutAttributes layoutAttributesForDecorationViewOfKind:JEKScrollableCollectionViewLayoutScrollViewKind withIndexPath:self.indexPath];
+    JEKScrollableSectionDecorationViewLayoutAttributes *attributes = [JEKScrollableSectionDecorationViewLayoutAttributes layoutAttributesForDecorationViewOfKind:JEKScrollableCollectionViewLayoutScrollViewKind withIndexPath:[NSIndexPath indexPathForItem:0 inSection:self.index]];
     CGRect frame = [self itemFrame];
     attributes.section = self;
 
