@@ -29,6 +29,7 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
 @property (nonatomic, assign) CGSize headerSize;
 @property (nonatomic, assign) CGSize footerSize;
 @property (nonatomic, assign) BOOL needsLayout;
+@property (nonatomic, assign) BOOL useFlowLayout;
 - (void)prepareLayout;
 
 @property (nonatomic, readonly) CGRect frame; // Relative frame of the section in the collection view
@@ -134,6 +135,7 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
             section.headerSize = [self headerSizeForSection:index];
             section.footerSize = [self footerSizeForSection:index];
             section.numberOfItems = [self.collectionView numberOfItemsInSection:index];
+            section.useFlowLayout = [self flowLayoutUsedInSection: index];
             NSMutableArray<NSValue *> *itemSizes = [NSMutableArray new];
             for (NSInteger item = 0; item < section.numberOfItems; ++item) {
                 CGSize itemSize = [self itemSizeForIndexPath:[NSIndexPath indexPathForItem:item inSection:section.index]];
@@ -349,6 +351,11 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
     return [self.delegate respondsToSelector:@selector(collectionView:layout:sizeForItemAtIndexPath:)] ? [self.delegate collectionView:self.collectionView layout:self sizeForItemAtIndexPath:indexPath] : self.itemSize;
 }
 
+- (BOOL)flowLayoutUsedInSection:(NSInteger)section
+{
+    return [self.sectionStyleDelegate respondsToSelector:@selector(collectionView:layout:flowLayoutUsedInSection:)] ? [self.sectionStyleDelegate collectionView:self.collectionView layout:self flowLayoutUsedInSection:section] : NO;
+}
+
 - (JEKScrollViewConfiguration *)scrollViewConfigurationForSection:(NSUInteger)section
 {
     JEKScrollViewConfiguration *configuration = self.defaultScrollViewConfiguration;
@@ -488,14 +495,27 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
     bounds.size.width = self.insets.left;
     bounds.size.height = self.headerSize.height;
     NSMutableArray<NSValue *> *itemFrames = [NSMutableArray new];
+    CGRect previousItemFrame = bounds;
+    previousItemFrame.origin.x = self.insets.left;
+    previousItemFrame.origin.y = self.insets.top + self.headerSize.height;
     for (NSUInteger item = 0; item < self.numberOfItems; ++item) {
         CGSize size = [self.itemSizes[item] CGSizeValue];
         CGRect frame;
         frame.size = size;
-        frame.origin.x = CGRectGetMaxX(bounds) + (item == 0 ? 0.0 : self.interItemSpacing);
-        frame.origin.y = self.insets.top + self.headerSize.height;
+
+        CGFloat largestXOnExistingRow = CGRectGetMaxX(previousItemFrame) + (item == 0 ? 0.0 : self.interItemSpacing);
+        if (self.useFlowLayout && (largestXOnExistingRow + frame.size.width) > (self.collectionViewWidth - self.insets.right)) {
+            // Flowlayout and item won't fit - place it on a new row below
+            frame.origin.x = self.insets.left;
+            frame.origin.y = CGRectGetMaxY(bounds) + (item == 0 ? 0.0 : self.interItemSpacing);
+        } else {
+            // Not flow layout or it actually fits in the current flow layouted row
+            frame.origin.x = CGRectGetMaxX(previousItemFrame) + (item == 0 ? 0.0 : self.interItemSpacing);
+            frame.origin.y = previousItemFrame.origin.y;
+        }
         bounds = CGRectUnion(bounds, frame);
         [itemFrames addObject:[NSValue valueWithCGRect:frame]];
+        previousItemFrame = frame;
     }
     bounds.size.width += self.insets.right;
     bounds.size.height += self.footerSize.height + self.insets.bottom;

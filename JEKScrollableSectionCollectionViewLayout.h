@@ -11,6 +11,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@protocol JEKSectionStyleDelegate;
 @class JEKScrollViewConfiguration;
 @interface JEKScrollableSectionCollectionViewLayout : UICollectionViewLayout
 
@@ -34,6 +35,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic) BOOL showsSectionBackgrounds;
 extern NSString * const JEKCollectionElementKindSectionBackground;
+
+@property (nonatomic, weak) id<JEKSectionStyleDelegate> sectionStyleDelegate;
 
 @end
 
@@ -69,6 +72,10 @@ extern NSString * const JEKCollectionElementKindSectionBackground;
 - (void)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout *)layout sectionDidEndDragging:(NSUInteger)section willDecelerate:(BOOL)decelerate;
 - (void)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout *)layout sectionWillBeginDecelerating:(NSUInteger)section;
 - (void)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout *)layout sectionDidEndDecelerating:(NSUInteger)section;
+@end
+
+@protocol JEKSectionStyleDelegate <UICollectionViewDelegateFlowLayout>
+- (BOOL)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout*)collectionViewLayout flowLayoutUsedInSection:(NSInteger)section;
 @end
 
 NS_ASSUME_NONNULL_END
