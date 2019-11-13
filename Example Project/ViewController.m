@@ -10,10 +10,11 @@
 #import "JEKScrollableSectionCollectionViewLayout.h"
 #import "ExampleCell.h"
 
-@interface ViewController () <UICollectionViewDelegateFlowLayout>
+@interface ViewController () <UICollectionViewDelegateFlowLayout, JEKCollectionViewDelegateScrollableSectionLayout>
 
 @property (nonatomic, assign) UIEdgeInsets section1Insets;
 @property (nonatomic, strong) NSArray<NSMutableArray<NSNumber *> *> *testData;
+@property (nonatomic, assign) NSInteger flowLayoutSectionIndex;
 
 @end
 
@@ -27,6 +28,7 @@
     layout.headerReferenceSize = CGSizeMake(100.0, 50.0);
     self.section1Insets = UIEdgeInsetsMake(20.0, 100.0, 20.0, 100.0);
     self.testData = [self generateTestData];
+    self.flowLayoutSectionIndex = 4;
 
     layout.showsSectionBackgrounds = NO; // Set to YES to test background views
     [self.collectionView registerClass:[UICollectionReusableView class] forSupplementaryViewOfKind:JEKCollectionElementKindSectionBackground withReuseIdentifier:@"backgroundView"];
@@ -73,7 +75,7 @@
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewFlowLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.section == 0) {
+    if (indexPath.section == 0 || indexPath.section == self.flowLayoutSectionIndex) {
         return CGSizeMake(80.0 + ((float)arc4random_uniform(20) - 10.0), 80.0 + ((float)arc4random_uniform(20) - 10.0));
     }
     return collectionViewLayout.itemSize;
@@ -115,6 +117,8 @@
             label.text = @"Section with insets";
         } else if (indexPath.section == 2) {
             label.text = @"Section with interItemSpacing";
+        } else if (indexPath.section == self.flowLayoutSectionIndex) {
+            label.text = @"Section with multiple sizes, using flow layout";
         } else {
             label.text = [NSString stringWithFormat:@"Section %ld", indexPath.section];
         }
@@ -136,5 +140,23 @@
 {
     NSLog(@"End displaying cell at %@", indexPath);
 }
+
+- (BOOL)shouldUseFlowLayoutInSection:(NSInteger)section
+{
+    return self.flowLayoutSectionIndex == section;
+}
+
+- (BOOL)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout*)collectionViewLayout shouldUseFlowLayoutInSection:(NSInteger)section
+{
+    return [self shouldUseFlowLayoutInSection: section];
+}
+
+- (nullable JEKScrollViewConfiguration *)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout *)layout scrollViewConfigurationForSection:(NSUInteger)section
+{
+    JEKScrollViewConfiguration * config = JEKScrollViewConfiguration.defaultConfiguration;
+    config.scrollEnabled = ![self shouldUseFlowLayoutInSection: section];
+    return config;
+}
+
 
 @end

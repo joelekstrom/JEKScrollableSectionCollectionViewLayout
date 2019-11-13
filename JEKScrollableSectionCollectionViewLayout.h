@@ -62,6 +62,7 @@ extern NSString * const JEKCollectionElementKindSectionBackground;
  defaultScrollViewConfiguration set on the layout object.
  */
 - (nullable JEKScrollViewConfiguration *)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout *)layout scrollViewConfigurationForSection:(NSUInteger)section;
+- (BOOL)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout*)collectionViewLayout shouldUseFlowLayoutInSection:(NSInteger)section;
 
 - (void)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout *)layout section:(NSUInteger)section didScrollToOffset:(CGFloat)horizontalOffset;
 - (void)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout *)layout sectionWillBeginDragging:(NSUInteger)section;
@@ -72,4 +73,3 @@ extern NSString * const JEKCollectionElementKindSectionBackground;
 @end
 
 NS_ASSUME_NONNULL_END
- 
