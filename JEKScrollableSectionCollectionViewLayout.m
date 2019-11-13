@@ -499,9 +499,7 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
     bounds.size.width = self.insets.left;
     bounds.size.height = self.headerSize.height;
     NSMutableArray<NSValue *> *itemFrames = [NSMutableArray new];
-    CGRect previousItemFrame = bounds;
-    previousItemFrame.origin.x = self.insets.left;
-    previousItemFrame.origin.y = self.insets.top + self.headerSize.height;
+    CGRect previousItemFrame = CGRectZero;
     for (NSUInteger item = 0; item < self.numberOfItems; ++item) {
         CGSize size = [self.itemSizes[item] CGSizeValue];
         CGRect frame;
@@ -514,8 +512,8 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
             frame.origin.y = CGRectGetMaxY(bounds) + (item == 0 ? 0.0 : self.interItemSpacing);
         } else {
             // Not flow layout or it actually fits in the current flow layouted row
-            frame.origin.x = CGRectGetMaxX(previousItemFrame) + (item == 0 ? 0.0 : self.interItemSpacing);
-            frame.origin.y = previousItemFrame.origin.y;
+            frame.origin.x = (item == 0 ? self.insets.left : CGRectGetMaxX(previousItemFrame) + self.interItemSpacing);
+            frame.origin.y = (item == 0 ? self.insets.top + self.headerSize.height : previousItemFrame.origin.y);
         }
         bounds = CGRectUnion(bounds, frame);
         [itemFrames addObject:[NSValue valueWithCGRect:frame]];
