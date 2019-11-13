@@ -75,7 +75,7 @@
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewFlowLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.section == 0 || indexPath.section == 4) {
+    if (indexPath.section == 0 || indexPath.section == self.flowLayoutSectionIndex) {
         return CGSizeMake(80.0 + ((float)arc4random_uniform(20) - 10.0), 80.0 + ((float)arc4random_uniform(20) - 10.0));
     }
     return collectionViewLayout.itemSize;
