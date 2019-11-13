@@ -1,7 +1,7 @@
 import Foundation
 import XCTest
 
-class LayoutMeasurements : NSObject, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+class LayoutMeasurements : NSObject, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, JEKCollectionViewDelegateScrollableSectionLayout {
     var itemSize = CGSize(width: 10, height: 10)
     var headerSize = CGSize.zero
     var footerSize = CGSize.zero
@@ -9,6 +9,7 @@ class LayoutMeasurements : NSObject, UICollectionViewDataSource, UICollectionVie
     var interItemSpacing: CGFloat = 0
     var numberOfSections: Int = 1
     var numberOfItems: Int = 2
+    var useFLowLayout = false
 }
 
 class Tests : XCTestCase {
@@ -44,6 +45,79 @@ class Tests : XCTestCase {
 
         let expectedContentSize = CGSize(width: collectionView.frame.size.width,
                                          height: measurements.sectionInsets.top + measurements.itemSize.height + measurements.sectionInsets.bottom)
+        XCTAssertEqual(layout.collectionViewContentSize, expectedContentSize)
+    }
+
+    func testFlowLayout() {
+        measurements.useFLowLayout = true
+        measurements.numberOfItems = 11
+        measurements.itemSize = CGSize(width: 32, height: 32)
+        layout.prepare()
+
+        let expectedOrigin = CGPoint(x: measurements.sectionInsets.left,
+                                     y: measurements.sectionInsets.top +
+                                        measurements.interItemSpacing +
+                                        measurements.itemSize.height)
+        let expectedFrame = CGRect(origin: expectedOrigin, size: measurements.itemSize)
+        let attributes = layout.layoutAttributesForItem(at: IndexPath(item: 10, section: 0))
+        XCTAssertEqual(attributes?.frame, expectedFrame)
+
+        let expectedContentSize = CGSize(width: collectionView.frame.size.width,
+                                         height: measurements.sectionInsets.top +
+                                            measurements.itemSize.height * 2 +
+                                            measurements.interItemSpacing +
+                                            measurements.sectionInsets.bottom)
+        XCTAssertEqual(layout.collectionViewContentSize, expectedContentSize)
+    }
+
+    func testFlowLayoutInterItemSpacing() {
+        measurements.useFLowLayout = true
+        measurements.numberOfItems = 10
+        measurements.itemSize = CGSize(width: 32, height: 32)
+        measurements.interItemSpacing = 1
+        layout.prepare()
+
+        let expectedOrigin = CGPoint(x: measurements.sectionInsets.left,
+                                     y: measurements.sectionInsets.top +
+                                        measurements.interItemSpacing +
+                                        measurements.itemSize.height)
+        let expectedFrame = CGRect(origin: expectedOrigin, size: measurements.itemSize)
+        let attributes = layout.layoutAttributesForItem(at: IndexPath(item: 9, section: 0))
+        XCTAssertEqual(attributes?.frame, expectedFrame)
+
+        let expectedContentSize = CGSize(width: collectionView.frame.size.width,
+                                         height: measurements.sectionInsets.top +
+                                            measurements.itemSize.height * 2 +
+                                            measurements.interItemSpacing +
+                                            measurements.sectionInsets.bottom)
+        XCTAssertEqual(layout.collectionViewContentSize, expectedContentSize)
+    }
+
+    func testFlowLayoutSectionInsets() {
+        measurements.useFLowLayout = true
+        measurements.numberOfItems = 10
+        measurements.itemSize = CGSize(width: 32, height: 32)
+        measurements.interItemSpacing = 1
+        measurements.sectionInsets = UIEdgeInsets(top: 10, left: 20, bottom: 30, right: 50)
+        layout.prepare()
+
+        let expectedOrigin = CGPoint(x: measurements.sectionInsets.left,
+                                     y: measurements.sectionInsets.top +
+                                        measurements.interItemSpacing +
+                                        measurements.itemSize.height)
+        let expectedFrame = CGRect(origin: expectedOrigin, size: measurements.itemSize)
+        // Index 7 (item no 8) should be first item on second row:
+        // Available space in CollectionView: 320 - 20 - 50 = 250
+        // 7 items take up 7x32 + 6 = 230
+        // --> 8th item (index 7) must be first item on second row
+        let attributes = layout.layoutAttributesForItem(at: IndexPath(item: 7, section: 0))
+        XCTAssertEqual(attributes?.frame, expectedFrame)
+
+        let expectedContentSize = CGSize(width: collectionView.frame.size.width,
+                                         height: measurements.sectionInsets.top +
+                                            measurements.itemSize.height * 2 +
+                                            measurements.interItemSpacing +
+                                            measurements.sectionInsets.bottom)
         XCTAssertEqual(layout.collectionViewContentSize, expectedContentSize)
     }
 
@@ -133,5 +207,9 @@ extension LayoutMeasurements {
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForFooterInSection section: Int) -> CGSize {
         return footerSize
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: JEKScrollableSectionCollectionViewLayout, shouldUseFlowLayoutInSection section: Int) -> Bool {
+        return useFLowLayout
     }
 }
