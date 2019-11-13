@@ -11,7 +11,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@protocol JEKSectionStyleDelegate;
 @class JEKScrollViewConfiguration;
 @interface JEKScrollableSectionCollectionViewLayout : UICollectionViewLayout
 
@@ -35,8 +34,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic) BOOL showsSectionBackgrounds;
 extern NSString * const JEKCollectionElementKindSectionBackground;
-
-@property (nonatomic, weak) id<JEKSectionStyleDelegate> sectionStyleDelegate;
 
 @end
 
@@ -65,6 +62,7 @@ extern NSString * const JEKCollectionElementKindSectionBackground;
  defaultScrollViewConfiguration set on the layout object.
  */
 - (nullable JEKScrollViewConfiguration *)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout *)layout scrollViewConfigurationForSection:(NSUInteger)section;
+- (BOOL)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout*)collectionViewLayout shouldUseFlowLayoutInSection:(NSInteger)section;
 
 - (void)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout *)layout section:(NSUInteger)section didScrollToOffset:(CGFloat)horizontalOffset;
 - (void)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout *)layout sectionWillBeginDragging:(NSUInteger)section;
@@ -74,9 +72,4 @@ extern NSString * const JEKCollectionElementKindSectionBackground;
 - (void)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout *)layout sectionDidEndDecelerating:(NSUInteger)section;
 @end
 
-@protocol JEKSectionStyleDelegate <UICollectionViewDelegateFlowLayout>
-- (BOOL)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout*)collectionViewLayout flowLayoutUsedInSection:(NSInteger)section;
-@end
-
 NS_ASSUME_NONNULL_END
- 

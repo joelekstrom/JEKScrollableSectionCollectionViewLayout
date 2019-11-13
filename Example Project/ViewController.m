@@ -10,10 +10,11 @@
 #import "JEKScrollableSectionCollectionViewLayout.h"
 #import "ExampleCell.h"
 
-@interface ViewController () <UICollectionViewDelegateFlowLayout, JEKSectionStyleDelegate, JEKCollectionViewDelegateScrollableSectionLayout>
+@interface ViewController () <UICollectionViewDelegateFlowLayout, JEKCollectionViewDelegateScrollableSectionLayout>
 
 @property (nonatomic, assign) UIEdgeInsets section1Insets;
 @property (nonatomic, strong) NSArray<NSMutableArray<NSNumber *> *> *testData;
+@property (nonatomic, assign) NSInteger flowLayoutSectionIndex;
 
 @end
 
@@ -23,11 +24,11 @@
 {
     [super viewDidLoad];
     JEKScrollableSectionCollectionViewLayout *layout = (JEKScrollableSectionCollectionViewLayout *)self.collectionViewLayout;
-    layout.sectionStyleDelegate = self;
     layout.itemSize = CGSizeMake(80.0, 80.0);
     layout.headerReferenceSize = CGSizeMake(100.0, 50.0);
     self.section1Insets = UIEdgeInsetsMake(20.0, 100.0, 20.0, 100.0);
     self.testData = [self generateTestData];
+    self.flowLayoutSectionIndex = 4;
 
     layout.showsSectionBackgrounds = NO; // Set to YES to test background views
     [self.collectionView registerClass:[UICollectionReusableView class] forSupplementaryViewOfKind:JEKCollectionElementKindSectionBackground withReuseIdentifier:@"backgroundView"];
@@ -116,12 +117,10 @@
             label.text = @"Section with insets";
         } else if (indexPath.section == 2) {
             label.text = @"Section with interItemSpacing";
-        } else if (indexPath.section == 4) {
-            label.text = @"Section with multiple sizes (using flow layout)";
+        } else if (indexPath.section == self.flowLayoutSectionIndex) {
+            label.text = @"Section with multiple sizes, using flow layout";
         } else {
-            label.text = [NSString stringWithFormat:@"Section %ld %@",
-                          indexPath.section,
-                          [self flowLayoutUsedInSection:indexPath.section] ? @"(using flow layout)" : @""];
+            label.text = [NSString stringWithFormat:@"Section %ld", indexPath.section];
         }
         return view;
     } else if (kind == JEKCollectionElementKindSectionBackground) {
@@ -142,20 +141,20 @@
     NSLog(@"End displaying cell at %@", indexPath);
 }
 
-- (BOOL)flowLayoutUsedInSection:(NSInteger)section
+- (BOOL)shouldUseFlowLayoutInSection:(NSInteger)section
 {
-    return section > 3 && section % 2 == 0;
+    return self.flowLayoutSectionIndex == section;
 }
 
-- (BOOL)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout*)collectionViewLayout flowLayoutUsedInSection:(NSInteger)section
+- (BOOL)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout*)collectionViewLayout shouldUseFlowLayoutInSection:(NSInteger)section
 {
-    return [self flowLayoutUsedInSection: section];
+    return [self shouldUseFlowLayoutInSection: section];
 }
 
 - (nullable JEKScrollViewConfiguration *)collectionView:(UICollectionView *)collectionView layout:(JEKScrollableSectionCollectionViewLayout *)layout scrollViewConfigurationForSection:(NSUInteger)section
 {
     JEKScrollViewConfiguration * config = JEKScrollViewConfiguration.defaultConfiguration;
-    config.scrollEnabled = ![self flowLayoutUsedInSection: section];
+    config.scrollEnabled = ![self shouldUseFlowLayoutInSection: section];
     return config;
 }
 
