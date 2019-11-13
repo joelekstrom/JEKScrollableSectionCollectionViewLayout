@@ -46,11 +46,11 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
 
 @interface JEKScrollableSectionLayoutInvalidationContext : UICollectionViewLayoutInvalidationContext
 @property (nonatomic, strong) JEKScrollableSectionInfo *invalidatedSection;
+@property (nonatomic, assign) BOOL invalidateCollectionViewWidth;
 @end
 
 @interface JEKScrollableSectionCollectionViewLayout() <UIScrollViewDelegate>
 @property (nonatomic, assign) CGSize contentSize;
-@property (nonatomic, assign) BOOL isAdjustingBoundsToInvalidateHorizontalSection;
 @property (nonatomic, strong) NSArray<JEKScrollableSectionInfo *> *sections;
 @property (nonatomic, strong) NSMutableDictionary<NSNumber *, NSNumber *> *offsetCache;
 @property (nonatomic, weak) id<UICollectionViewDelegateFlowLayout> delegate;
@@ -159,6 +159,13 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
         return;
     }
 
+    if (context.invalidateCollectionViewWidth) {
+        for (JEKScrollableSectionInfo *section in self.sections) {
+            section.needsLayout = YES;
+            section.collectionViewWidth = self.collectionView.frame.size.width;
+        }
+    }
+
     if (context.invalidateDataSourceCounts) {
         for (JEKScrollableSectionInfo *section in self.sections) {
             section.needsLayout = YES;
@@ -231,41 +238,15 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
     return visibleAttributes;
 }
 
-// NOTE: On iOS<13, UICollectionView will only ever dequeue new cells if its bounds
-// change, regardless if all layout attributes are updated within invalidateLayoutWithContext.
-// Therefore a hack is required to make this layout work. After updating the frames in
-// invalidateLayoutWithContext: above, slightly change the bounds to make sure that the
-// collectionView queries for cells that may have entered the visible area.
-- (void)adjustBoundsToInvalidateVisibleItemIndexPaths
-{
-    _isAdjustingBoundsToInvalidateHorizontalSection = YES;
-    CGRect bounds = self.collectionView.bounds;
-    bounds.origin.x = bounds.origin.x == 0.0 ? -0.1 : 0.0;
-    [self.collectionView setBounds:bounds];
-}
-
 - (BOOL)shouldInvalidateLayoutForBoundsChange:(CGRect)newBounds
 {
-    if (_isAdjustingBoundsToInvalidateHorizontalSection) {
-        _isAdjustingBoundsToInvalidateHorizontalSection = NO;
-        return YES;
-    } else if (newBounds.size.width != self.contentSize.width) {
-        return YES;
-    }
-    return NO;
+    return newBounds.size.width != self.contentSize.width;
 }
 
 - (UICollectionViewLayoutInvalidationContext *)invalidationContextForBoundsChange:(CGRect)newBounds
 {
-    UICollectionViewLayoutInvalidationContext *context = [super invalidationContextForBoundsChange:newBounds];
-    if (newBounds.size.width != self.collectionViewContentSize.width) {
-        for (JEKScrollableSectionInfo *section in self.sections) {
-            NSIndexPath *sectionIndexPath = [NSIndexPath indexPathWithIndex:[self.sections indexOfObject:section]];
-            [context invalidateDecorationElementsOfKind:JEKScrollableCollectionViewLayoutScrollViewKind atIndexPaths:@[sectionIndexPath]];
-            [context invalidateSupplementaryElementsOfKind:UICollectionElementKindSectionHeader atIndexPaths:@[sectionIndexPath]];
-            [context invalidateSupplementaryElementsOfKind:UICollectionElementKindSectionFooter atIndexPaths:@[sectionIndexPath]];
-        }
-    }
+    JEKScrollableSectionLayoutInvalidationContext *context = (JEKScrollableSectionLayoutInvalidationContext *)[super invalidationContextForBoundsChange:newBounds];
+    context.invalidateCollectionViewWidth = YES;
     return context;
 }
 
@@ -291,11 +272,6 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
     JEKScrollableSectionLayoutInvalidationContext *invalidationContext = [JEKScrollableSectionLayoutInvalidationContext new];
     invalidationContext.invalidatedSection = self.sections[section];
     [self invalidateLayoutWithContext:invalidationContext];
-
-    // No need to run the bounds hack on iOS 13+
-    if (@available(iOS 13.0, *)) {} else {
-        [self adjustBoundsToInvalidateVisibleItemIndexPaths];
-    }
 
     if (DELEGATE_RESPONDS_TO_SELECTOR(@selector(collectionView:layout:section:didScrollToOffset:))) {
         [DELEGATE collectionView:self.collectionView layout:self section:section didScrollToOffset:scrollView.contentOffset.x];
