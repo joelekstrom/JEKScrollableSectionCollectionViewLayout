@@ -25,7 +25,6 @@ and you have to set the measurements in code. Check the example project for a fu
 
 ## Planned features
 - Support for `sectionHeadersPinToVisibleBounds`
-- Support for multiple rows in single section
 
 ## Section backgrounds
 The layout has support for showing background views behind each seaction.
