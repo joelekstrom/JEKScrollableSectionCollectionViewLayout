@@ -231,7 +231,7 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
     return visibleAttributes;
 }
 
-// NOTE: UICollectionView will only ever dequeue new cells if its bounds
+// NOTE: On iOS<13, UICollectionView will only ever dequeue new cells if its bounds
 // change, regardless if all layout attributes are updated within invalidateLayoutWithContext.
 // Therefore a hack is required to make this layout work. After updating the frames in
 // invalidateLayoutWithContext: above, slightly change the bounds to make sure that the
@@ -291,7 +291,11 @@ NSString * const JEKCollectionElementKindSectionBackground = @"JEKCollectionElem
     JEKScrollableSectionLayoutInvalidationContext *invalidationContext = [JEKScrollableSectionLayoutInvalidationContext new];
     invalidationContext.invalidatedSection = self.sections[section];
     [self invalidateLayoutWithContext:invalidationContext];
-    [self adjustBoundsToInvalidateVisibleItemIndexPaths];
+
+    // No need to run the bounds hack on iOS 13+
+    if (@available(iOS 13.0, *)) {} else {
+        [self adjustBoundsToInvalidateVisibleItemIndexPaths];
+    }
 
     if (DELEGATE_RESPONDS_TO_SELECTOR(@selector(collectionView:layout:section:didScrollToOffset:))) {
         [DELEGATE collectionView:self.collectionView layout:self section:section didScrollToOffset:scrollView.contentOffset.x];
