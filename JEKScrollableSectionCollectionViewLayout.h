@@ -18,6 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) CGSize itemSize;
 @property (nonatomic) CGSize headerReferenceSize;
 @property (nonatomic) CGSize footerReferenceSize;
+@property (nonatomic) CGSize estimatedItemSize;
 @property (nonatomic) UIEdgeInsets sectionInset;
 
 /**
